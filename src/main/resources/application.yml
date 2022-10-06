@@ -73,18 +73,6 @@ info:
   version: '@project.version@'
   stage: dev
 
-time-config:
-  maxTimePolling: 600
-
-restTemplate:
-  requestTimeout: 60000
-  poolTimeout: 10000
-  connectionTimeout: 10000
-  maxTotalPooling: 200
-  defaultMaxPerRoute: 200
-  networkTimeout: 60000
-  connectTimeout: 10000
-
 rates:
   jobCron: '0 0 0/1 * * ?'
   currencies:
