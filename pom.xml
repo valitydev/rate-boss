@@ -176,7 +176,36 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+
         <plugins>
+            <plugin>
+                <groupId>dev.vality.maven.plugins</groupId>
+                <artifactId>pg-embedded-plugin</artifactId>
+                <version>1.0.1</version>
+                <configuration>
+                    <port>${db.port}</port>
+                    <dbName>${db.name}</dbName>
+                    <schemas>
+                        <schema>${db.schema}</schema>
+                    </schemas>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>PG_server_start</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>PG_server_stop</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
