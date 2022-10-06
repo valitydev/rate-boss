@@ -1,0 +1,96 @@
+server:
+  port: '@server.port@'
+management:
+  security:
+    flag: false
+  server:
+    port: '@management.port@'
+  metrics:
+    tags:
+      application: rate-boss
+    export:
+      prometheus:
+        enabled: false
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+spring:
+  application:
+    name: '@project.name@'
+  output:
+    ansi:
+      enabled: always
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: '@db.pg.url@'
+    username: '@db.pg.user@'
+    password: '@db.pg.password@'
+  quartz:
+    job-store-type: jdbc
+    properties:
+      org.quartz.scheduler.instanceName: rateboss
+      org.quartz.scheduler.instanceId: AUTO
+      org.quartz.scheduler.skipUpdateCheck: true
+      org.quartz.scheduler.threadsInheritContextClassLoaderOfInitializer: true
+      org.quartz.threadPool.threadCount: 10
+      org.quartz.threadPool.threadPriority: 5
+      org.quartz.jobStore.isClustered: false
+      org.quartz.jobStore.misfireThreshold: 30000
+      org.quartz.jobStore.class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+      org.quartz.jobStore.useProperties: false
+      org.quartz.jobStore.tablePrefix: QRTZ_
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      properties:
+        session.timeout.ms: 60000
+        max.poll.interval.ms: 60000
+
+kafka:
+  producer:
+    max-retries: 10
+    retry-backoff-ms: 10000
+    batch-size: 50
+    acks: "1"
+    delivery-timeout-ms: 120000
+  topic:
+    producer:
+      exchange:
+        name: db.exchange.rate
+
+info:
+  version: '@project.version@'
+  stage: dev
+
+time-config:
+  maxTimePolling: 600
+
+restTemplate:
+  requestTimeout: 60000
+  poolTimeout: 10000
+  connectionTimeout: 10000
+  maxTotalPooling: 200
+  defaultMaxPerRoute: 200
+  networkTimeout: 60000
+  connectTimeout: 10000
+
+rates:
+  jobCron: '0 0 0/1 * * ?'
+  currencies:
+    - symbolCode: "USD"
+      exponent: 2
+  source:
+    fixer:
+      rootUrl: https://api.apilayer.com/fixer/
+      apiKey: CJjxZVaxXZCJCfTzkKFQQP0GzP1ytmB2

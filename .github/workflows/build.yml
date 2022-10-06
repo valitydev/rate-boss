@@ -1,0 +1,14 @@
+name: Maven Build Artifact
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    uses: empayre/java-workflow/.github/workflows/maven-service-build.yml@v2-beta
+    secrets:
+      action-fetch-token: ${{ secrets.ACTIONS_FETCH_TOKEN }}
+      github-pkg-ro-pat: ${{ secrets.GH_PACKAGES_RO_PAT2 }}
+      github-pkg-ro-user: 'empayre-bot'
