@@ -49,11 +49,13 @@ class ExchangeService(
                             exchangeRate.value.scale().toByte()
                         )
                     )
-                    .setExchangeRate(Rational().apply {
-                        val rational = exchangeRate.value.toRational()
-                        p = rational.numerator
-                        q = rational.denominator
-                    })
+                    .setExchangeRate(
+                        Rational().apply {
+                            val rational = exchangeRate.value.toRational()
+                            p = rational.numerator
+                            q = rational.denominator
+                        }
+                    )
                     .setTimestamp(Instant.ofEpochSecond(exchangeRates.timestamp).toString())
             )
             CurrencyEvent(eventId, eventTime, payload)
@@ -64,8 +66,8 @@ class ExchangeService(
                 { result ->
                     log.debug {
                         "Successfully send currency event. Topic=" + result?.recordMetadata?.topic() + ";" +
-                                " Offset=" + result?.recordMetadata?.offset() + ";" +
-                                " Partition=" + result?.recordMetadata?.partition()
+                            " Offset=" + result?.recordMetadata?.offset() + ";" +
+                            " Partition=" + result?.recordMetadata?.partition()
                     }
                 },
                 { log.error(it.cause) { "Failed to send event. Topic=${producerRecord.topic()}; Partition=${producerRecord.partition()}" } }

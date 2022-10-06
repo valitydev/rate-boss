@@ -21,8 +21,7 @@ class FixerExchangeRateSource(
 
         return ExchangeRates(
             rates = fixerLatestResponse.rates!!,
-            timestamp = fixerLatestResponse.timestamp!!,
-
+            timestamp = fixerLatestResponse.timestamp!!
         )
     }
 }

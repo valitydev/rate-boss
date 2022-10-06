@@ -3,7 +3,6 @@ package dev.vality.rateboss.extensions
 import java.math.BigDecimal
 import java.math.BigInteger
 
-
 fun BigDecimal.toRational(): Rational {
     val denominator: BigInteger = if (this.scale() > 0) BigInteger.TEN.pow(this.scale()) else BigInteger.ONE
     val numerator: BigInteger = this.remainder(BigDecimal.ONE)

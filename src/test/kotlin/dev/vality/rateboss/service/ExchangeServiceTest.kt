@@ -76,5 +76,4 @@ class ExchangeServiceTest : ContainerConfiguration() {
         assertTrue(BigDecimal("${firstRecordExchangeRate[0]}.${firstRecordExchangeRate[1]}") == rubExchangeRate)
         assertTrue(secondRecordExchangeRate == btcExchangeRate)
     }
-
 }
