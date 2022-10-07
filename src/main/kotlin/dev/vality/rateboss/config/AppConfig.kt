@@ -17,7 +17,7 @@ class AppConfig {
     @Bean
     fun retryTemplate(
         @Value("\${retryTemplate.backOffPeriod}") backOffPeriod: Long,
-        @Value("\${retryTemplate.maxAttempts}") maxAttempts: Int,
+        @Value("\${retryTemplate.maxAttempts}") maxAttempts: Int
     ): RetryTemplate {
         val retryTemplate = RetryTemplate()
         val fixedBackOffPolicy = FixedBackOffPolicy()

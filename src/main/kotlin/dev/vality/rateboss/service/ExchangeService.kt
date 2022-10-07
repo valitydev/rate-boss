@@ -50,8 +50,8 @@ class ExchangeService(
                 { result ->
                     log.debug {
                         "Successfully send currency event. Topic=" + result?.recordMetadata?.topic() + ";" +
-                                " Offset=" + result?.recordMetadata?.offset() + ";" +
-                                " Partition=" + result?.recordMetadata?.partition()
+                            " Offset=" + result?.recordMetadata?.offset() + ";" +
+                            " Partition=" + result?.recordMetadata?.partition()
                     }
                 },
                 { log.error(it.cause) { "Failed to send event. Topic=${producerRecord.topic()}; Partition=${producerRecord.partition()}" } }
@@ -63,7 +63,7 @@ class ExchangeService(
         baseCurrencySymbolCode: String,
         baseCurrencyExponent: Byte,
         exchangeRateMap: Map.Entry<String, BigDecimal>,
-        exchangeRateTimestamp: Long,
+        exchangeRateTimestamp: Long
     ): CurrencyEventPayload? {
         return CurrencyEventPayload.exchange_rate(
             CurrencyExchangeRate()
