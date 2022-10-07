@@ -62,19 +62,23 @@ kafka:
     max-retries: 10
     retry-backoff-ms: 10000
     batch-size: 50
-    acks: "1"
     delivery-timeout-ms: 120000
   topic:
     producer:
-      exchange:
-        name: db.exchange.rate
+      exchangeTopic: db.exchange.rate
 
 info:
   version: '@project.version@'
   stage: dev
 
+retryTemplate:
+  backOffPeriod: 10000
+  maxAttempts: 5
+
 rates:
   jobCron: '0 0 0/1 * * ?'
+  jobKey: 'exchange-rate-grabber-master-job'
+  jobTriggerName: 'exchange-rate-grabber-master-job-trigger'
   currencies:
     - symbolCode: "USD"
       exponent: 2

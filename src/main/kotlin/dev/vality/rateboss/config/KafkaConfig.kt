@@ -2,6 +2,7 @@ package dev.vality.rateboss.config
 
 import dev.vality.exrates.events.CurrencyEvent
 import dev.vality.kafka.common.serialization.ThriftSerializer
+import dev.vality.rateboss.config.properties.KafkaCustomProperties
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,6 +20,9 @@ class KafkaConfig {
     @Autowired
     lateinit var kafkaProperties: KafkaProperties
 
+    @Autowired
+    lateinit var kafkaCustomProperties: KafkaCustomProperties
+
     fun producerConfigs(
         maxRetries: Int,
         retryBackoffMs: Long,
@@ -30,7 +34,7 @@ class KafkaConfig {
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
         props[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = ThriftSerializer::class.java
         props[ProducerConfig.BATCH_SIZE_CONFIG] = batchSize
-        props[ProducerConfig.ACKS_CONFIG] = acks
+        props[ProducerConfig.ACKS_CONFIG] = ACKS_CONFIG
         props[ProducerConfig.RETRIES_CONFIG] = maxRetries
         props[ProducerConfig.RETRY_BACKOFF_MS_CONFIG] = retryBackoffMs
         props[ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG] = deliveryTimeout
@@ -38,20 +42,14 @@ class KafkaConfig {
     }
 
     @Bean
-    fun producerFactory(
-        @Value("\${kafka.producer.max-retries}") maxRetries: Int,
-        @Value("\${kafka.producer.retry-backoff-ms}") retryBackoffMs: Long,
-        @Value("\${kafka.producer.batch-size}") batchSize: Int,
-        @Value("\${kafka.producer.acks}") acks: String,
-        @Value("\${kafka.producer.delivery-timeout-ms}") deliveryTimeoutMs: Int
-    ): ProducerFactory<String, CurrencyEvent> {
+    fun producerFactory(): ProducerFactory<String, CurrencyEvent> {
         return DefaultKafkaProducerFactory(
             producerConfigs(
-                maxRetries,
-                retryBackoffMs,
-                batchSize,
-                acks,
-                deliveryTimeoutMs
+                kafkaCustomProperties.producer.maxRetries,
+                kafkaCustomProperties.producer.retryBackoffMs,
+                kafkaCustomProperties.producer.batchSize,
+                ACKS_CONFIG,
+                kafkaCustomProperties.producer.deliveryTimeoutMs
             )
         )
     }
@@ -59,5 +57,9 @@ class KafkaConfig {
     @Bean
     fun kafkaTemplate(producerFactory: ProducerFactory<String, CurrencyEvent>): KafkaTemplate<String, CurrencyEvent> {
         return KafkaTemplate(producerFactory)
+    }
+
+    private companion object {
+        const val ACKS_CONFIG = "1"
     }
 }

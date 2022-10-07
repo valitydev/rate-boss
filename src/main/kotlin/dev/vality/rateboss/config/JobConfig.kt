@@ -20,14 +20,14 @@ class JobConfig {
     @PostConstruct
     fun init() {
         schedulerFactoryBean.addJob(exchangeRateGrabberMasterJob(), true, true)
-        if (!schedulerFactoryBean.checkExists(TriggerKey(RATES_GRABBER_TRIGGER_KEY))) {
+        if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.jobTriggerName))) {
             schedulerFactoryBean.scheduleJob(exchangeRateGrabberMasterTrigger())
         }
     }
 
     fun exchangeRateGrabberMasterJob(): JobDetailImpl {
         val jobDetail = JobDetailImpl()
-        jobDetail.key = JobKey("exchange-rate-grabber-master-job")
+        jobDetail.key = JobKey(ratesProperties.jobKey)
         jobDetail.jobClass = ExchangeGrabberMasterJob::class.java
 
         return jobDetail
@@ -36,12 +36,8 @@ class JobConfig {
     fun exchangeRateGrabberMasterTrigger(): CronTrigger {
         return TriggerBuilder.newTrigger()
             .forJob(exchangeRateGrabberMasterJob())
-            .withIdentity(RATES_GRABBER_TRIGGER_KEY)
+            .withIdentity(ratesProperties.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.jobCron))
             .build()
-    }
-
-    private companion object {
-        const val RATES_GRABBER_TRIGGER_KEY = "rate-grabber-master-trigger"
     }
 }

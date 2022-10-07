@@ -1,5 +1,6 @@
 package dev.vality.rateboss.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.retry.backoff.FixedBackOffPolicy
@@ -14,13 +15,16 @@ class AppConfig {
     fun restTemplate() = RestTemplate()
 
     @Bean
-    fun retryTemplate(): RetryTemplate {
+    fun retryTemplate(
+        @Value("\${retryTemplate.backOffPeriod}") backOffPeriod: Long,
+        @Value("\${retryTemplate.maxAttempts}") maxAttempts: Int,
+    ): RetryTemplate {
         val retryTemplate = RetryTemplate()
         val fixedBackOffPolicy = FixedBackOffPolicy()
-        fixedBackOffPolicy.backOffPeriod = 10000L
+        fixedBackOffPolicy.backOffPeriod = backOffPeriod
         retryTemplate.setBackOffPolicy(fixedBackOffPolicy)
         val retryPolicy = SimpleRetryPolicy()
-        retryPolicy.maxAttempts = 5
+        retryPolicy.maxAttempts = maxAttempts
         retryTemplate.setRetryPolicy(retryPolicy)
 
         return retryTemplate

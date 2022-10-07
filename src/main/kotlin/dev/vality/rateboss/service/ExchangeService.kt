@@ -12,6 +12,7 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -24,7 +25,7 @@ class ExchangeService(
     private val kafkaTemplate: KafkaTemplate<String, CurrencyEvent>
 ) {
 
-    @Value("\${kafka.topic.producer.exchange.name}")
+    @Value("\${kafka.topic.producer.exchangeTopic}")
     lateinit var topicName: String
 
     fun sendExchangeRates(
@@ -32,31 +33,14 @@ class ExchangeService(
         baseCurrencyExponent: Byte,
         exchangeRates: ExchangeRates
     ) {
-        val currencyEvents = exchangeRates.rates.map { exchangeRate ->
+        val currencyEvents = exchangeRates.rates.map { exchangeRatesMap ->
             val eventId = UUID.randomUUID().toString()
             val eventTime = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
-            val payload = CurrencyEventPayload.exchange_rate(
-                CurrencyExchangeRate()
-                    .setSourceCurrency(
-                        Currency(
-                            baseCurrencySymbolCode,
-                            baseCurrencyExponent
-                        )
-                    )
-                    .setDestinationCurrency(
-                        Currency(
-                            exchangeRate.key,
-                            exchangeRate.value.scale().toByte()
-                        )
-                    )
-                    .setExchangeRate(
-                        Rational().apply {
-                            val rational = exchangeRate.value.toRational()
-                            p = rational.numerator
-                            q = rational.denominator
-                        }
-                    )
-                    .setTimestamp(Instant.ofEpochSecond(exchangeRates.timestamp).toString())
+            val payload = buildCurrencyExchangeRatePayload(
+                baseCurrencySymbolCode,
+                baseCurrencyExponent,
+                exchangeRatesMap,
+                exchangeRates.timestamp
             )
             CurrencyEvent(eventId, eventTime, payload)
         }
@@ -66,12 +50,43 @@ class ExchangeService(
                 { result ->
                     log.debug {
                         "Successfully send currency event. Topic=" + result?.recordMetadata?.topic() + ";" +
-                            " Offset=" + result?.recordMetadata?.offset() + ";" +
-                            " Partition=" + result?.recordMetadata?.partition()
+                                " Offset=" + result?.recordMetadata?.offset() + ";" +
+                                " Partition=" + result?.recordMetadata?.partition()
                     }
                 },
                 { log.error(it.cause) { "Failed to send event. Topic=${producerRecord.topic()}; Partition=${producerRecord.partition()}" } }
             )
         }
+    }
+
+    private fun buildCurrencyExchangeRatePayload(
+        baseCurrencySymbolCode: String,
+        baseCurrencyExponent: Byte,
+        exchangeRateMap: Map.Entry<String, BigDecimal>,
+        exchangeRateTimestamp: Long,
+    ): CurrencyEventPayload? {
+        return CurrencyEventPayload.exchange_rate(
+            CurrencyExchangeRate()
+                .setSourceCurrency(
+                    Currency(
+                        baseCurrencySymbolCode,
+                        baseCurrencyExponent
+                    )
+                )
+                .setDestinationCurrency(
+                    Currency(
+                        exchangeRateMap.key,
+                        exchangeRateMap.value.scale().toByte()
+                    )
+                )
+                .setExchangeRate(
+                    Rational().apply {
+                        val rational = exchangeRateMap.value.toRational()
+                        p = rational.numerator
+                        q = rational.denominator
+                    }
+                )
+                .setTimestamp(Instant.ofEpochSecond(exchangeRateTimestamp).toString())
+        )
     }
 }

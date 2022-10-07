@@ -9,6 +9,8 @@ import org.springframework.validation.annotation.Validated
 @ConfigurationProperties(prefix = "rates")
 data class RatesProperties(
     val jobCron: String,
+    val jobKey: String,
+    val jobTriggerName: String,
     val currencies: List<CurrencyProperties>,
     val source: RatesSourceProperties
 )
