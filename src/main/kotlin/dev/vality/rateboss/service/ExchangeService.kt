@@ -5,6 +5,7 @@ import dev.vality.exrates.events.Currency
 import dev.vality.exrates.events.CurrencyEvent
 import dev.vality.exrates.events.CurrencyEventPayload
 import dev.vality.exrates.events.CurrencyExchangeRate
+import dev.vality.geck.common.util.TypeUtil
 import dev.vality.rateboss.extensions.toRational
 import dev.vality.rateboss.source.model.ExchangeRates
 import mu.KotlinLogging
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.ZoneOffset
 import java.util.*
 
 private val log = KotlinLogging.logger {}
@@ -35,7 +36,7 @@ class ExchangeService(
     ) {
         val currencyEvents = exchangeRates.rates.map { exchangeRatesMap ->
             val eventId = UUID.randomUUID().toString()
-            val eventTime = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)
+            val eventTime = TypeUtil.temporalToString(LocalDateTime.now(), ZoneOffset.UTC)
             val payload = buildCurrencyExchangeRatePayload(
                 baseCurrencySymbolCode,
                 baseCurrencyExponent,
@@ -86,7 +87,7 @@ class ExchangeService(
                         q = rational.denominator
                     }
                 )
-                .setTimestamp(Instant.ofEpochSecond(exchangeRateTimestamp).toString())
+                .setTimestamp(TypeUtil.temporalToString(Instant.ofEpochSecond(exchangeRateTimestamp)))
         )
     }
 }
