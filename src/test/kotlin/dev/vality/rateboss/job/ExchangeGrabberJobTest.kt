@@ -42,5 +42,4 @@ class ExchangeGrabberJobTest : ContainerConfiguration() {
             verify(exchangeService, atLeastOnce()).sendExchangeRates(any(), any(), any())
         }
     }
-
 }
