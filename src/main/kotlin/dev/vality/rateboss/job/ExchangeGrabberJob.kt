@@ -20,7 +20,7 @@ class ExchangeGrabberJob : QuartzJobBean() {
         val exchangeRateSource = applicationContext.getBean(ExchangeRateSource::class.java)
         val exchangeService = applicationContext.getBean(ExchangeService::class.java)
         val currencySymbolCode = context.jobDetail.jobDataMap["currencySymbolCode"] as String
-        val currencyExponent = context.jobDetail.jobDataMap["currencyExponent"] as String
+        val currencyExponent = context.jobDetail.jobDataMap["currencyExponent"] as Int
         val exchangeRates = retryTemplate.execute<ExchangeRates, ExchangeRateSourceException> {
             exchangeRateSource.getExchangeRate(currencySymbolCode)
         }
