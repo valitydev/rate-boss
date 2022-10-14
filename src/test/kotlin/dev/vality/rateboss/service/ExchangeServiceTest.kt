@@ -39,7 +39,7 @@ class ExchangeServiceTest : ContainerConfiguration() {
         )
 
         // When
-        exchangeService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toByte(), exchangeRates)
+        exchangeService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
 
         // Then
         verify(kafkaTemplate, times(3)).send(any<ProducerRecord<String, CurrencyEvent>>())
@@ -61,7 +61,7 @@ class ExchangeServiceTest : ContainerConfiguration() {
         )
 
         // When
-        exchangeService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toByte(), exchangeRates)
+        exchangeService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
 
         // Then
         val argumentCaptor = argumentCaptor<ProducerRecord<String, CurrencyEvent>>()

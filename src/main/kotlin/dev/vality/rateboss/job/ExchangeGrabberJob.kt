@@ -25,6 +25,6 @@ class ExchangeGrabberJob : QuartzJobBean() {
             exchangeRateSource.getExchangeRate(currencySymbolCode)
         }
         log.info { "Send exchange rates for currency=$currencySymbolCode" }
-        exchangeService.sendExchangeRates(currencySymbolCode, currencyExponent.toByte(), exchangeRates)
+        exchangeService.sendExchangeRates(currencySymbolCode, currencyExponent.toShort(), exchangeRates)
     }
 }
