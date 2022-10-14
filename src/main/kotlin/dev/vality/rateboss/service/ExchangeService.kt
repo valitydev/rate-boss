@@ -31,7 +31,7 @@ class ExchangeService(
 
     fun sendExchangeRates(
         baseCurrencySymbolCode: String,
-        baseCurrencyExponent: Byte,
+        baseCurrencyExponent: Short,
         exchangeRates: ExchangeRates
     ) {
         val currencyEvents = exchangeRates.rates.map { exchangeRatesMap ->
@@ -49,7 +49,7 @@ class ExchangeService(
             val producerRecord = ProducerRecord(topicName, currencyEvent.eventId, currencyEvent)
             kafkaTemplate.send(producerRecord).addCallback(
                 { result ->
-                    log.debug {
+                    log.info {
                         "Successfully send currency event. Topic=" + result?.recordMetadata?.topic() + ";" +
                             " Offset=" + result?.recordMetadata?.offset() + ";" +
                             " Partition=" + result?.recordMetadata?.partition()
@@ -62,7 +62,7 @@ class ExchangeService(
 
     private fun buildCurrencyExchangeRatePayload(
         baseCurrencySymbolCode: String,
-        baseCurrencyExponent: Byte,
+        baseCurrencyExponent: Short,
         exchangeRateMap: Map.Entry<String, BigDecimal>,
         exchangeRateTimestamp: Long
     ): CurrencyEventPayload? {
@@ -77,7 +77,7 @@ class ExchangeService(
                 .setDestinationCurrency(
                     Currency(
                         exchangeRateMap.key,
-                        exchangeRateMap.value.scale().toByte()
+                        exchangeRateMap.value.scale().toShort()
                     )
                 )
                 .setExchangeRate(
