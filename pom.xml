@@ -117,6 +117,10 @@
             <artifactId>logstash-logback-encoder</artifactId>
             <version>7.2</version>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.msk</groupId>
+            <artifactId>aws-msk-iam-auth</artifactId>
+        </dependency>
 
         <!--Test/Dev-->
         <dependency>
