@@ -1,7 +1,8 @@
 package dev.vality.rateboss.job
 
 import dev.vality.rateboss.ContainerConfiguration
-import dev.vality.rateboss.service.ExchangeService
+import dev.vality.rateboss.service.ExchangeDaoService
+import dev.vality.rateboss.service.ExchangeEventService
 import dev.vality.rateboss.source.ExchangeRateSource
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.awaitility.Awaitility.await
@@ -21,7 +22,10 @@ import java.util.concurrent.TimeUnit
 class ExchangeGrabberJobTest : ContainerConfiguration() {
 
     @SpyBean
-    lateinit var exchangeService: ExchangeService
+    lateinit var exchangeEventService: ExchangeEventService
+
+    @SpyBean
+    lateinit var exchangeDaoService: ExchangeDaoService
 
     @MockBean
     lateinit var exchangeRateSource: ExchangeRateSource
@@ -39,7 +43,8 @@ class ExchangeGrabberJobTest : ContainerConfiguration() {
         }
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {
-            verify(exchangeService, atLeastOnce()).sendExchangeRates(any(), any(), any())
+            verify(exchangeEventService, atLeastOnce()).sendExchangeRates(any(), any(), any())
         }
+        verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any(), any(), any())
     }
 }
