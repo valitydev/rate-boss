@@ -24,7 +24,7 @@ class ExchangeGrabberJobTest : ContainerConfiguration() {
     @SpyBean
     lateinit var exchangeEventService: ExchangeEventService
 
-    @SpyBean
+    @MockBean
     lateinit var exchangeDaoService: ExchangeDaoService
 
     @MockBean
@@ -44,7 +44,8 @@ class ExchangeGrabberJobTest : ContainerConfiguration() {
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {
             verify(exchangeEventService, atLeastOnce()).sendExchangeRates(any(), any(), any())
+            verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any(), any(), any())
         }
-        verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any(), any(), any())
+
     }
 }
