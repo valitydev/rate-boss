@@ -46,6 +46,5 @@ class ExchangeGrabberJobTest : ContainerConfiguration() {
             verify(exchangeEventService, atLeastOnce()).sendExchangeRates(any(), any(), any())
             verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any(), any(), any())
         }
-
     }
 }
