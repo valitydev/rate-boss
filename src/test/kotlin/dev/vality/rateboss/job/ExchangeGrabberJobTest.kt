@@ -35,8 +35,8 @@ class ExchangeGrabberJobTest : ContainerConfiguration() {
         whenever(exchangeRateSource.getExchangeRate(any())).then {
             ExchangeRates(
                 rates = mapOf(
-                    "AED" to BigDecimal(3.67304),
-                    "AFN" to BigDecimal(85.586049)
+                    "AED" to BigDecimal.valueOf(3.593066),
+                    "AMD" to BigDecimal.valueOf(397.376632)
                 ),
                 timestamp = Instant.now().epochSecond
             )
