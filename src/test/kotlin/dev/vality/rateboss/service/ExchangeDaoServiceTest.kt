@@ -11,11 +11,16 @@ import org.jooq.DSLContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import java.math.BigDecimal
 import java.time.Instant
 
 class ExchangeDaoServiceTest : ContainerConfiguration() {
+
+    @MockBean
+    lateinit var scheduler: Scheduler
 
     @Autowired
     lateinit var exchangeDaoService: ExchangeDaoService

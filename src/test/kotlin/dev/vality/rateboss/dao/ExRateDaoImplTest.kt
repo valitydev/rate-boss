@@ -7,12 +7,17 @@ import org.jooq.DSLContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDateTime
 
 @Testcontainers
 class ExRateDaoImplTest : ContainerConfiguration() {
+
+    @MockBean
+    lateinit var scheduler: Scheduler
 
     @Autowired
     lateinit var exRateDao: ExRateDao
