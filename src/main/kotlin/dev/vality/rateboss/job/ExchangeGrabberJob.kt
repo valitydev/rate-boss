@@ -28,7 +28,20 @@ class ExchangeGrabberJob : QuartzJobBean() {
         }
         log.info { "Send exchange rates for currency=$currencySymbolCode" }
         exchangeEventService.sendExchangeRates(currencySymbolCode, currencyExponent.toShort(), exchangeRates)
-        log.info { "Save exchange rates for currency=$currencySymbolCode" }
-        exchangeDaoService.saveExchangeRates(currencySymbolCode, currencyExponent.toShort(), exchangeRates)
+        saveExchangeRate(currencySymbolCode, exchangeDaoService, currencyExponent, exchangeRates)
+    }
+
+    private fun saveExchangeRate(
+        currencySymbolCode: String,
+        exchangeDaoService: ExchangeDaoService,
+        currencyExponent: Int,
+        exchangeRates: ExchangeRates
+    ) {
+        try {
+            log.info { "Save exchange rates for currency=$currencySymbolCode" }
+            exchangeDaoService.saveExchangeRates(currencySymbolCode, currencyExponent.toShort(), exchangeRates)
+        } catch (e: Exception) {
+            log.error("Couldn't save exchange rates for currency={} ", currencySymbolCode, e)
+        }
     }
 }

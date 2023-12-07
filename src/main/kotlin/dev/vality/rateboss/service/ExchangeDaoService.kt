@@ -28,7 +28,6 @@ class ExchangeDaoService(
             )
             exRate
         }
-        log.info("Try to save exRate batch with size: {}", exRates.size)
         log.debug("Try to save exRate batch {}", exRates)
         exRateDao.saveBatch(exRates)
         log.info("Successfully save exRate batch with size: {}", exRates.size)

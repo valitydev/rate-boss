@@ -32,25 +32,26 @@ class ExRateDaoImplTest : ContainerConfiguration() {
 
     @Test
     fun saveBatchWithSameCodes() {
-        val firstExRate = ExRate()
-        firstExRate.sourceCurrencySymbolicCode = "USD"
-        firstExRate.sourceCurrencyExponent = 2
-        firstExRate.destinationCurrencySymbolicCode = "UZS"
-        firstExRate.destinationCurrencyExponent = 6
-        firstExRate.rationalP = 11190000264
-        firstExRate.rationalQ = 1000000
-        firstExRate.rateTimestamp = LocalDateTime.now()
-
-        val secondExRate = ExRate()
-        secondExRate.sourceCurrencySymbolicCode = "USD"
-        secondExRate.sourceCurrencyExponent = 2
-        secondExRate.destinationCurrencySymbolicCode = "UZS"
-        secondExRate.destinationCurrencyExponent = 6
-        secondExRate.rationalP = 1119000000
-        secondExRate.rationalQ = 1000000
-        secondExRate.rateTimestamp = LocalDateTime.now()
-
+        val firstExRate = ExRate().apply {
+            sourceCurrencySymbolicCode = "USD"
+            sourceCurrencyExponent = 2
+            destinationCurrencySymbolicCode = "UZS"
+            destinationCurrencyExponent = 6
+            rationalP = 11190000264
+            rationalQ = 1000000
+            rateTimestamp = LocalDateTime.now()
+        }
+        val secondExRate = ExRate().apply {
+            sourceCurrencySymbolicCode = "USD"
+            sourceCurrencyExponent = 2
+            destinationCurrencySymbolicCode = "UZS"
+            destinationCurrencyExponent = 6
+            rationalP = 1119000000
+            rationalQ = 1000000
+            rateTimestamp = LocalDateTime.now()
+        }
         val entities = listOf(firstExRate, secondExRate)
+
         exRateDao.saveBatch(entities)
 
         val records = dslContext.fetch(EX_RATE)
@@ -60,25 +61,26 @@ class ExRateDaoImplTest : ContainerConfiguration() {
 
     @Test
     fun saveBatch() {
-        val firstExRate = ExRate()
-        firstExRate.sourceCurrencySymbolicCode = "USD"
-        firstExRate.sourceCurrencyExponent = 2
-        firstExRate.destinationCurrencySymbolicCode = "UZS"
-        firstExRate.destinationCurrencyExponent = 6
-        firstExRate.rationalP = 11190000264
-        firstExRate.rationalQ = 1000000
-        firstExRate.rateTimestamp = LocalDateTime.now()
-
-        val secondExRate = ExRate()
-        secondExRate.sourceCurrencySymbolicCode = "USD"
-        secondExRate.sourceCurrencyExponent = 2
-        secondExRate.destinationCurrencySymbolicCode = "RUB"
-        secondExRate.destinationCurrencyExponent = 6
-        secondExRate.rationalP = 1119000000
-        secondExRate.rationalQ = 1000000
-        secondExRate.rateTimestamp = LocalDateTime.now()
-
+        val firstExRate = ExRate().apply {
+            sourceCurrencySymbolicCode = "USD"
+            sourceCurrencyExponent = 2
+            destinationCurrencySymbolicCode = "UZS"
+            destinationCurrencyExponent = 6
+            rationalP = 11190000264
+            rationalQ = 1000000
+            rateTimestamp = LocalDateTime.now()
+        }
+        val secondExRate = ExRate().apply {
+            sourceCurrencySymbolicCode = "USD"
+            sourceCurrencyExponent = 2
+            destinationCurrencySymbolicCode = "RUB"
+            destinationCurrencyExponent = 6
+            rationalP = 1119000000
+            rationalQ = 1000000
+            rateTimestamp = LocalDateTime.now()
+        }
         val entities = listOf(firstExRate, secondExRate)
+
         exRateDao.saveBatch(entities)
 
         val records = dslContext.fetch(EX_RATE)
@@ -87,21 +89,22 @@ class ExRateDaoImplTest : ContainerConfiguration() {
 
     @Test
     fun getBySymbolicCodes() {
-        val exRate = ExRate()
-        exRate.sourceCurrencySymbolicCode = "USD"
-        exRate.sourceCurrencyExponent = 2
-        exRate.destinationCurrencySymbolicCode = "UZS"
-        exRate.destinationCurrencyExponent = 6
-        exRate.rationalP = 11190000264
-        exRate.rationalQ = 1000000
-        exRate.rateTimestamp = LocalDateTime.now()
-
+        val exRate = ExRate().apply {
+            sourceCurrencySymbolicCode = "USD"
+            sourceCurrencyExponent = 2
+            destinationCurrencySymbolicCode = "UZS"
+            destinationCurrencyExponent = 6
+            rationalP = 11190000264
+            rationalQ = 1000000
+            rateTimestamp = LocalDateTime.now()
+        }
         dslContext.insertInto(EX_RATE)
             .set(dslContext.newRecord(EX_RATE, exRate))
             .execute()
 
         val result =
             exRateDao.getBySymbolicCodes(exRate.sourceCurrencySymbolicCode, exRate.destinationCurrencySymbolicCode)
+
         assertEquals(exRate.rationalP, result?.rationalP)
         assertEquals(exRate.rationalQ, result?.rationalQ)
     }

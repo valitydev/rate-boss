@@ -16,15 +16,15 @@ class ExRateConverter {
         exchangeRateMap: Map.Entry<String, BigDecimal>,
         exchangeRateTimestamp: Long
     ): ExRate {
-        val exRate = ExRate()
-        exRate.sourceCurrencySymbolicCode = baseCurrencySymbolCode
-        exRate.sourceCurrencyExponent = baseCurrencyExponent
-        exRate.destinationCurrencySymbolicCode = exchangeRateMap.key
-        exRate.destinationCurrencyExponent = exchangeRateMap.value.scale().toShort()
-        val rational = exchangeRateMap.value.toRational()
-        exRate.rationalP = rational.numerator
-        exRate.rationalQ = rational.denominator
-        exRate.rateTimestamp = LocalDateTime.ofEpochSecond(exchangeRateTimestamp, 0, ZoneOffset.UTC)
-        return exRate
+        return ExRate().apply {
+            sourceCurrencySymbolicCode = baseCurrencySymbolCode
+            sourceCurrencyExponent = baseCurrencyExponent
+            destinationCurrencySymbolicCode = exchangeRateMap.key
+            destinationCurrencyExponent = exchangeRateMap.value.scale().toShort()
+            val rational = exchangeRateMap.value.toRational()
+            rationalP = rational.numerator
+            rationalQ = rational.denominator
+            rateTimestamp = LocalDateTime.ofEpochSecond(exchangeRateTimestamp, 0, ZoneOffset.UTC)
+        }
     }
 }
