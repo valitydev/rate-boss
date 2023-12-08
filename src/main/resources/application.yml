@@ -1,10 +1,10 @@
 server:
-  port: '@server.port@'
+  port: ${server.port}
 management:
   security:
     flag: false
   server:
-    port: '@management.port@'
+    port: ${management.port}
   metrics:
     tags:
       application: rate-boss
@@ -32,9 +32,9 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: '@db.pg.url@'
-    username: '@db.pg.user@'
-    password: '@db.pg.password@'
+    url: ${db.pg.url}
+    username: ${db.pg.user}
+    password: ${db.pg.password}
   quartz:
     job-store-type: jdbc
     properties:

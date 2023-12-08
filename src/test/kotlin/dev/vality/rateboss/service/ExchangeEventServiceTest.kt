@@ -10,16 +10,21 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.kafka.core.KafkaTemplate
 import java.math.BigDecimal
 import java.time.Instant
 
-class ExchangeServiceTest : ContainerConfiguration() {
+class ExchangeEventServiceTest : ContainerConfiguration() {
+
+    @MockBean
+    lateinit var scheduler: Scheduler
 
     @Autowired
-    lateinit var exchangeService: ExchangeService
+    lateinit var exchangeEventService: ExchangeEventService
 
     @SpyBean
     lateinit var kafkaTemplate: KafkaTemplate<String, CurrencyEvent>
@@ -39,7 +44,7 @@ class ExchangeServiceTest : ContainerConfiguration() {
         )
 
         // When
-        exchangeService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
+        exchangeEventService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
 
         // Then
         verify(kafkaTemplate, times(3)).send(any<ProducerRecord<String, CurrencyEvent>>())
@@ -61,7 +66,7 @@ class ExchangeServiceTest : ContainerConfiguration() {
         )
 
         // When
-        exchangeService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
+        exchangeEventService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
 
         // Then
         val argumentCaptor = argumentCaptor<ProducerRecord<String, CurrencyEvent>>()

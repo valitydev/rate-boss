@@ -22,7 +22,7 @@ import java.util.*
 private val log = KotlinLogging.logger {}
 
 @Service
-class ExchangeService(
+class ExchangeEventService(
     private val kafkaTemplate: KafkaTemplate<String, CurrencyEvent>
 ) {
 
