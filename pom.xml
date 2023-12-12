@@ -75,7 +75,7 @@
         <dependency>
             <groupId>dev.vality</groupId>
             <artifactId>exrates-proto</artifactId>
-            <version>1.6-56a317c</version>
+            <version>1.7-ce9563e</version>
         </dependency>
         <dependency>
             <groupId>dev.vality</groupId>

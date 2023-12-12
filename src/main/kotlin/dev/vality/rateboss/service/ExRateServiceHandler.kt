@@ -1,5 +1,6 @@
 package dev.vality.rateboss.service
 
+import dev.vality.exrates.service.ExRateNotFound
 import dev.vality.exrates.service.ExchangeRateServiceSrv
 import dev.vality.exrates.service.GetCurrencyExchangeRateRequest
 import dev.vality.exrates.service.GetCurrencyExchangeRateResult
@@ -23,7 +24,7 @@ class ExRateServiceHandler(
         )
         val result = exchangeRateData?.let {
             getCurrencyExchangeRateResultConverter.convert(exchangeRateData)
-        } ?: GetCurrencyExchangeRateResult()
+        } ?: throw ExRateNotFound()
         log.info("Result getExchangeRateData with body: {}", result)
         return result
     }

@@ -1,15 +1,16 @@
 package dev.vality.rateboss.service
 
 import dev.vality.exrates.service.CurrencyData
+import dev.vality.exrates.service.ExRateNotFound
 import dev.vality.exrates.service.GetCurrencyExchangeRateRequest
 import dev.vality.rateboss.ContainerConfiguration
 import dev.vality.rateboss.dao.domain.Tables
 import dev.vality.rateboss.dao.domain.tables.pojos.ExRate
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -43,12 +44,7 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
                     .setSourceCurrency(sourceCurrency)
                     .setDestinationCurrency(destinationCurrency)
             )
-
-        val result = exRateServiceHandler.getExchangeRateData(request)
-
-        assertNull(result.exchange_rate)
-        assertNull(result.currencyData)
-        assertNull(result.timestamp)
+        assertThrows<ExRateNotFound> { exRateServiceHandler.getExchangeRateData(request) }
     }
 
     @Test
