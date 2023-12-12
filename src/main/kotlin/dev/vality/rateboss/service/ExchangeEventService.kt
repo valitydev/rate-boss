@@ -1,7 +1,7 @@
 package dev.vality.rateboss.service
 
+import dev.vality.exrates.base.Currency
 import dev.vality.exrates.base.Rational
-import dev.vality.exrates.events.Currency
 import dev.vality.exrates.events.CurrencyEvent
 import dev.vality.exrates.events.CurrencyEventPayload
 import dev.vality.exrates.events.CurrencyExchangeRate
