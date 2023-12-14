@@ -12,13 +12,12 @@ class ExRateServlet(
 
     private lateinit var servlet: Servlet
 
-    @Throws(ServletException::class)
-    override fun init(config: ServletConfig?) {
+    override fun init(config: ServletConfig) {
         super.init(config)
         servlet = THServiceBuilder().build(ExchangeRateServiceSrv.Iface::class.java, serverHandler)
     }
 
-    override fun service(request: ServletRequest?, response: ServletResponse?) {
+    override fun service(request: ServletRequest, response: ServletResponse) {
         servlet.service(request, response)
     }
 }
