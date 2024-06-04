@@ -8,28 +8,31 @@ import dev.vality.rateboss.source.impl.CbrExchangeRateSource
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.quartz.Scheduler
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
+import org.springframework.test.context.TestPropertySource
 import org.springframework.util.concurrent.SettableListenableFuture
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-@SpringBootTest(
-    properties = [
-        "rates.jobCron=0/5 * * * * ?",
-        "rates.currencies.[0].symbolCode=RUB",
-        "rates.currencies.[0].exponent=2"
-    ]
-)
+@SpringBootTest
+@TestPropertySource(properties = [
+    "rates.jobCron=0/5 * * * * ?",
+    "rates.currencies.[0].symbolCode=RUB",
+    "rates.currencies.[0].exponent=2"
+])
 class RubExchangeGrabberJobTest : ContainerConfiguration() {
 
     @SpyBean
@@ -43,6 +46,14 @@ class RubExchangeGrabberJobTest : ContainerConfiguration() {
 
     @MockBean
     lateinit var cbrExchangeRateSource: CbrExchangeRateSource
+
+    @Autowired
+    lateinit var scheduler: Scheduler
+
+    @AfterEach
+    fun tearDown() {
+        scheduler.shutdown()
+    }
 
     @Test
     fun `test grabber job`() {

@@ -8,11 +8,14 @@ import dev.vality.rateboss.source.impl.FixerExchangeRateSource
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.quartz.Scheduler
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -43,6 +46,14 @@ class UsdExchangeGrabberJobTest : ContainerConfiguration() {
 
     @MockBean
     lateinit var fixerExchangeRateSource: FixerExchangeRateSource
+
+    @Autowired
+    lateinit var scheduler: Scheduler
+
+    @AfterEach
+    fun tearDown() {
+        scheduler.shutdown()
+    }
 
     @Test
     fun `test grabber job`() {
