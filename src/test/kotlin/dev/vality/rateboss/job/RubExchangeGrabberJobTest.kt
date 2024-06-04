@@ -45,7 +45,7 @@ class RubExchangeGrabberJobTest : ContainerConfiguration() {
     lateinit var cbrExchangeRateSource: CbrExchangeRateSource
 
     @Test
-    fun `test grabber job for`() {
+    fun `test grabber job`() {
         whenever(cbrExchangeRateSource.getSourceId()).thenReturn("sourceId")
         whenever(cbrExchangeRateSource.getExchangeRate(any())).then {
             ExchangeRates(

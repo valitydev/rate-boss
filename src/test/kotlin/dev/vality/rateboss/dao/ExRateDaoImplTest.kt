@@ -179,7 +179,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             source = sourceId,
             rateTimestamp = firstExRate.rateTimestamp.minusMinutes(10)
         )
-        val emptyResult = exRateDao.getExRateByTimestamp(requestTimestampBeforeFirstExRate)
+        val emptyResult = exRateDao.getByCodesAndTimestamp(requestTimestampBeforeFirstExRate)
 
         assertNull(emptyResult)
 
@@ -189,7 +189,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             source = sourceId,
             rateTimestamp = secondExRate.rateTimestamp.plusMinutes(3)
         )
-        val secondResult = exRateDao.getExRateByTimestamp(requestTimestampBetweenSecondAndThirdExRate)!!
+        val secondResult = exRateDao.getByCodesAndTimestamp(requestTimestampBetweenSecondAndThirdExRate)!!
 
         assertEquals(secondExRate.rationalP, secondResult.rationalP)
         assertEquals(secondExRate.rateTimestamp, secondResult.rateTimestamp)
@@ -200,7 +200,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             source = sourceId,
             rateTimestamp = thirdExRate.rateTimestamp.plusMinutes(20)
         )
-        val thirdResult = exRateDao.getExRateByTimestamp(requestTimestampBetweenAfterThirdExRate)!!
+        val thirdResult = exRateDao.getByCodesAndTimestamp(requestTimestampBetweenAfterThirdExRate)!!
 
         assertEquals(thirdExRate.rationalP, thirdResult.rationalP)
         assertEquals(thirdExRate.rateTimestamp, thirdResult.rateTimestamp)

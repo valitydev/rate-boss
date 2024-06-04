@@ -35,7 +35,7 @@ class ExchangeDaoService(
         log.info("Successfully save exRate batch with size: {}", exRates.size)
     }
 
-    fun getRecentExRateBySymbolicCodes(sourceCode: String, destinationCode: String): ExchangeRateData? {
+    fun getRecentExchangeRateBySymbolicCodes(sourceCode: String, destinationCode: String): ExchangeRateData? {
         val exRate = exRateDao.getRecentBySymbolicCodes(sourceCode, destinationCode)
         return exRate?.let {
             ExchangeRateData(
@@ -49,8 +49,8 @@ class ExchangeDaoService(
         }
     }
 
-    fun getExRateByTimestamp(request: TimestampExchangeRateRequest): BigFraction? {
-        val exRate = exRateDao.getExRateByTimestamp(request)
+    fun getExchangeRateByTimestamp(request: TimestampExchangeRateRequest): BigFraction? {
+        val exRate = exRateDao.getByCodesAndTimestamp(request)
         return exRate?.let {
             BigFraction(it.rationalP, it.rationalQ)
         }

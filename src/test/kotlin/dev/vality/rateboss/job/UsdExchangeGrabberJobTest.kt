@@ -45,7 +45,7 @@ class UsdExchangeGrabberJobTest : ContainerConfiguration() {
     lateinit var fixerExchangeRateSource: FixerExchangeRateSource
 
     @Test
-    fun `test grabber job for`() {
+    fun `test grabber job`() {
         whenever(fixerExchangeRateSource.getSourceId()).thenReturn("sourceId")
         whenever(fixerExchangeRateSource.getExchangeRate(any())).then {
             ExchangeRates(

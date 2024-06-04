@@ -19,7 +19,7 @@ class ExRateServiceHandler(
 
     override fun getExchangeRateData(request: GetCurrencyExchangeRateRequest): GetCurrencyExchangeRateResult {
         log.info("Get getExchangeRateData request with body: {} ", request)
-        val exchangeRateData = exRateDaoService.getRecentExRateBySymbolicCodes(
+        val exchangeRateData = exRateDaoService.getRecentExchangeRateBySymbolicCodes(
             request.currencyData.sourceCurrency,
             request.currencyData.destinationCurrency
         )
@@ -33,12 +33,12 @@ class ExRateServiceHandler(
     override fun getConvertedAmount(sourceId: String, conversionRequest: ConversionRequest): Rational {
         log.info("Get getConvertedAmount request for source: {} with body: {} ", sourceId, conversionRequest)
         val exchangeTimestampRequest = timestampExchangeRateRequestConverter.convert(conversionRequest, sourceId)
-        val exRateByTimestamp = exRateDaoService.getExRateByTimestamp(exchangeTimestampRequest)
+        val exRateByTimestamp = exRateDaoService.getExchangeRateByTimestamp(exchangeTimestampRequest)
         val result = exRateByTimestamp?.let {
             val convertedAmount = conversionService.convertAmount(conversionRequest.amount, exRateByTimestamp)
             Rational(convertedAmount.numeratorAsLong, convertedAmount.denominatorAsLong)
         } ?: throw ExRateNotFound()
-        log.info("Result getConvertedAmount: {} ", result)
+        log.info("Result getConvertedAmount with body: {} ", result)
         return result
     }
 }

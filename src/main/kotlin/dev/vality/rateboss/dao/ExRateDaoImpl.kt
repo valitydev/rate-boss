@@ -49,7 +49,7 @@ class ExRateDaoImpl(
             .fetchOneInto(ExRate::class.java)
     }
 
-    override fun getExRateByTimestamp(request: TimestampExchangeRateRequest): ExRate? {
+    override fun getByCodesAndTimestamp(request: TimestampExchangeRateRequest): ExRate? {
         val t = EX_RATE
         return dsl.selectFrom(t)
             .where(

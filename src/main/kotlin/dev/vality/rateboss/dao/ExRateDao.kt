@@ -9,5 +9,5 @@ interface ExRateDao {
 
     fun getRecentBySymbolicCodes(sourceCode: String, destinationCode: String): ExRate?
 
-    fun getExRateByTimestamp(request: TimestampExchangeRateRequest): ExRate?
+    fun getByCodesAndTimestamp(request: TimestampExchangeRateRequest): ExRate?
 }
