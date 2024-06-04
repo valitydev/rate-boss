@@ -21,18 +21,18 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
-import org.springframework.test.context.TestPropertySource
 import org.springframework.util.concurrent.SettableListenableFuture
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-@SpringBootTest
-@TestPropertySource(properties = [
-    "rates.jobCron=0/5 * * * * ?",
-    "rates.currencies.[0].symbolCode=RUB",
-    "rates.currencies.[0].exponent=2"
-])
+@SpringBootTest(
+    properties = [
+        "rates.jobCron=0/5 * * * * ?",
+        "rates.currencies.[0].symbolCode=RUB",
+        "rates.currencies.[0].exponent=2"
+    ]
+)
 class RubExchangeGrabberJobTest : ContainerConfiguration() {
 
     @SpyBean
