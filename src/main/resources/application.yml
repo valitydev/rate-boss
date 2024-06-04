@@ -32,9 +32,9 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: grigorijmalevannyj
-    password: password
+    url: ${db.pg.url}
+    username: ${db.pg.user}
+    password: ${db.pg.password}
   quartz:
     job-store-type: jdbc
     properties:

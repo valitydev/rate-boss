@@ -14,17 +14,17 @@ class ExRateConverter {
     fun convert(
         baseCurrencySymbolCode: String,
         baseCurrencyExponent: Short,
-        exchangeRateMap: Map.Entry<String, BigDecimal>,
+        exchangeRateMapEntry: Map.Entry<String, BigDecimal>,
         exchangeRateTimestamp: Long,
         sourceId: String
     ): ExRate {
-        val sourceCurrency = Currency.getInstance(exchangeRateMap.key)
+        val sourceCurrency = Currency.getInstance(exchangeRateMapEntry.key)
         return ExRate().apply {
             destinationCurrencySymbolicCode = baseCurrencySymbolCode
             destinationCurrencyExponent = baseCurrencyExponent
             sourceCurrencySymbolicCode = sourceCurrency.currencyCode
             sourceCurrencyExponent = sourceCurrency.defaultFractionDigits.toShort()
-            val rational = exchangeRateMap.value.toRational()
+            val rational = exchangeRateMapEntry.value.toRational()
             rationalP = rational.numerator
             rationalQ = rational.denominator
             rateTimestamp = LocalDateTime.ofEpochSecond(exchangeRateTimestamp, 0, ZoneOffset.UTC)
