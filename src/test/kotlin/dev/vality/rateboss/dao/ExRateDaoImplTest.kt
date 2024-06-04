@@ -141,7 +141,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             destinationCurrencySymbolicCode = destinationCurrency
             destinationCurrencyExponent = 2
             rationalP = 11190000264
-            rationalQ = 1000000
+            rationalQ = 1000055
             rateTimestamp = LocalDateTime.now().minusHours(1)
             source = sourceId
         }
@@ -151,7 +151,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             destinationCurrencySymbolicCode = destinationCurrency
             destinationCurrencyExponent = 2
             rationalP = 1119000546
-            rationalQ = 1000000
+            rationalQ = 1000066
             rateTimestamp = LocalDateTime.now().minusMinutes(30)
             source = sourceId
         }
@@ -161,7 +161,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             destinationCurrencySymbolicCode = destinationCurrency
             destinationCurrencyExponent = 2
             rationalP = 1119000229
-            rationalQ = 1000000
+            rationalQ = 1000077
             rateTimestamp = LocalDateTime.now().minusMinutes(10)
             source = sourceId
         }
@@ -192,7 +192,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
         val secondResult = exRateDao.getByCodesAndTimestamp(requestTimestampBetweenSecondAndThirdExRate)!!
 
         assertEquals(secondExRate.rationalP, secondResult.rationalP)
-        assertEquals(secondExRate.rateTimestamp, secondResult.rateTimestamp)
+        assertEquals(secondExRate.rationalQ, secondResult.rationalQ)
 
         val requestTimestampBetweenAfterThirdExRate = TimestampExchangeRateRequest(
             sourceCurrency = sourceCurrency,
@@ -203,6 +203,6 @@ class ExRateDaoImplTest : ContainerConfiguration() {
         val thirdResult = exRateDao.getByCodesAndTimestamp(requestTimestampBetweenAfterThirdExRate)!!
 
         assertEquals(thirdExRate.rationalP, thirdResult.rationalP)
-        assertEquals(thirdExRate.rateTimestamp, thirdResult.rateTimestamp)
+        assertEquals(thirdExRate.rationalQ, thirdResult.rationalQ)
     }
 }
