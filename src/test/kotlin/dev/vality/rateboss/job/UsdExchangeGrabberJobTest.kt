@@ -4,7 +4,7 @@ import dev.vality.exrates.events.CurrencyEvent
 import dev.vality.rateboss.ContainerConfiguration
 import dev.vality.rateboss.service.ExchangeDaoService
 import dev.vality.rateboss.service.ExchangeEventService
-import dev.vality.rateboss.source.ExchangeRateSource
+import dev.vality.rateboss.source.impl.FixerExchangeRateSource
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
@@ -23,8 +23,14 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-@SpringBootTest(properties = ["rates.jobCron=0/5 * * * * ?"])
-class ExchangeGrabberJobTest : ContainerConfiguration() {
+@SpringBootTest(
+    properties = [
+        "rates.jobCron=0/5 * * * * ?",
+        "rates.currencies.[0].symbolCode=USD",
+        "rates.currencies.[0].exponent=2"
+    ]
+)
+class UsdExchangeGrabberJobTest : ContainerConfiguration() {
 
     @SpyBean
     lateinit var exchangeEventService: ExchangeEventService
@@ -36,11 +42,12 @@ class ExchangeGrabberJobTest : ContainerConfiguration() {
     lateinit var exchangeDaoService: ExchangeDaoService
 
     @MockBean
-    lateinit var exchangeRateSource: ExchangeRateSource
+    lateinit var fixerExchangeRateSource: FixerExchangeRateSource
 
     @Test
-    fun `test grabber job`() {
-        whenever(exchangeRateSource.getExchangeRate(any())).then {
+    fun `test grabber job for`() {
+        whenever(fixerExchangeRateSource.getSourceId()).thenReturn("sourceId")
+        whenever(fixerExchangeRateSource.getExchangeRate(any())).then {
             ExchangeRates(
                 rates = mapOf(
                     "AED" to BigDecimal.valueOf(3.593066),
@@ -56,7 +63,7 @@ class ExchangeGrabberJobTest : ContainerConfiguration() {
             verify(exchangeEventService, atLeastOnce()).sendExchangeRates(any(), any(), any())
         }
         await().atMost(1, TimeUnit.SECONDS).untilAsserted {
-            verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any(), any(), any())
+            verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any())
         }
     }
 }

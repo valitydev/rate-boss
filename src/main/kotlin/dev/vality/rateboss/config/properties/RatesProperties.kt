@@ -3,6 +3,7 @@ package dev.vality.rateboss.config.properties
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.validation.annotation.Validated
+import java.time.ZoneId
 
 @Validated
 @ConstructorBinding
@@ -21,10 +22,16 @@ data class CurrencyProperties(
 )
 
 data class RatesSourceProperties(
-    val fixer: FixerProperties
+    val fixer: FixerProperties,
+    val cbr: CbrProperties
 )
 
 data class FixerProperties(
     val rootUrl: String,
     val apiKey: String
+)
+
+data class CbrProperties(
+    val rootUrl: String,
+    val timeZone: ZoneId
 )

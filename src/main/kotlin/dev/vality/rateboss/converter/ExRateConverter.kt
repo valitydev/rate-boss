@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.*
 
 @Component
 class ExRateConverter {
@@ -14,17 +15,20 @@ class ExRateConverter {
         baseCurrencySymbolCode: String,
         baseCurrencyExponent: Short,
         exchangeRateMap: Map.Entry<String, BigDecimal>,
-        exchangeRateTimestamp: Long
+        exchangeRateTimestamp: Long,
+        sourceId: String
     ): ExRate {
+        val sourceCurrency = Currency.getInstance(exchangeRateMap.key)
         return ExRate().apply {
-            sourceCurrencySymbolicCode = baseCurrencySymbolCode
-            sourceCurrencyExponent = baseCurrencyExponent
-            destinationCurrencySymbolicCode = exchangeRateMap.key
-            destinationCurrencyExponent = exchangeRateMap.value.scale().toShort()
+            destinationCurrencySymbolicCode = baseCurrencySymbolCode
+            destinationCurrencyExponent = baseCurrencyExponent
+            sourceCurrencySymbolicCode = sourceCurrency.currencyCode
+            sourceCurrencyExponent = sourceCurrency.defaultFractionDigits.toShort()
             val rational = exchangeRateMap.value.toRational()
             rationalP = rational.numerator
             rationalQ = rational.denominator
             rateTimestamp = LocalDateTime.ofEpochSecond(exchangeRateTimestamp, 0, ZoneOffset.UTC)
+            source = sourceId
         }
     }
 }

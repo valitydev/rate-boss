@@ -1,6 +1,9 @@
-package dev.vality.rateboss.source
+package dev.vality.rateboss.source.impl
 
-import dev.vality.rateboss.client.FixerApiClient
+import dev.vality.rateboss.client.fixer.FixerApiClient
+import dev.vality.rateboss.job.constant.ExRateSources
+import dev.vality.rateboss.source.ExchangeRateSource
+import dev.vality.rateboss.source.ExchangeRateSourceException
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.springframework.stereotype.Component
 
@@ -13,15 +16,19 @@ class FixerExchangeRateSource(
         val fixerLatestResponse = try {
             fixerApiClient.getLatest(currencySymbolCode)
         } catch (e: Exception) {
-            throw ExchangeRateSourceException(currencySymbolCode, "Remote client exception", e)
+            throw ExchangeRateSourceException("Remote client exception", e)
         }
         if (!fixerLatestResponse.success) {
-            throw ExchangeRateSourceException(currencySymbolCode, "Unsuccessful response from FixerApi")
+            throw ExchangeRateSourceException("Unsuccessful response from FixerApi")
         }
 
         return ExchangeRates(
             rates = fixerLatestResponse.rates!!,
             timestamp = fixerLatestResponse.timestamp!!
         )
+    }
+
+    override fun getSourceId(): String {
+        return ExRateSources.FIXER
     }
 }

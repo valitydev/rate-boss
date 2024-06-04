@@ -32,9 +32,9 @@ spring:
   main:
     allow-bean-definition-overriding: true
   datasource:
-    url: ${db.pg.url}
-    username: ${db.pg.user}
-    password: ${db.pg.password}
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: grigorijmalevannyj
+    password: password
   quartz:
     job-store-type: jdbc
     properties:
@@ -86,3 +86,6 @@ rates:
     fixer:
       rootUrl: https://api.apilayer.com/fixer/
       apiKey: CJjxZVaxXZCJCfTzkKFQQP0GzP1ytmB2
+    cbr:
+      rootUrl: https://www.cbr.ru/scripts/XML_daily.asp
+      timeZone: Europe/Moscow
