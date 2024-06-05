@@ -59,7 +59,7 @@ class ExRateDaoImpl(
                 t.DESTINATION_CURRENCY_SYMBOLIC_CODE.eq(request.destinationCurrency)
                     .and(t.SOURCE_CURRENCY_SYMBOLIC_CODE.eq(request.sourceCurrency))
                     .and(t.SOURCE.eq(request.source))
-                    .and(DSL.cast(t.RATE_TIMESTAMP, SQLDataType.LOCALDATE).lt(targetRateDate))
+                    .and(DSL.cast(t.RATE_TIMESTAMP, SQLDataType.LOCALDATE).eq(targetRateDate))
             ).orderBy(t.RATE_TIMESTAMP.desc())
             .limit(1)
             .fetchOneInto(ExRate::class.java)

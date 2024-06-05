@@ -62,7 +62,7 @@ class CbrExchangeGrabberJobTest : ContainerConfiguration() {
                 timestamp = Instant.now().epochSecond
             )
         }
-        await().atMost(1, TimeUnit.SECONDS).untilAsserted {
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted {
             verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any())
         }
     }

@@ -117,7 +117,7 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
         val conversionRequest = ConversionRequest()
             .setAmount(100L)
             .setDatetime(
-                exRate.rateTimestamp.plusDays(1).format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT))
+                exRate.rateTimestamp.plusMinutes(10).format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT))
             )
             .setDestination(destinationCurrency)
             .setSource(sourceCurrency)

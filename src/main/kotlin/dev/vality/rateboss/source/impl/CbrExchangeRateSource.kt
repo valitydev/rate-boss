@@ -9,6 +9,7 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.ZoneOffset
 
 private val log = KotlinLogging.logger {}
 
@@ -32,10 +33,11 @@ class CbrExchangeRateSource(
         val rates: Map<String, BigDecimal> = response.currencies!!.associate {
             it.charCode!! to it.value!!.divide(it.nominal!!.toBigDecimal())
         }
-        log.info("Exchange rates from cbr have been retrieved, time=$time, exchangeRates=$rates")
+        val nextDayTimestamp = response.date!!.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC)
+        log.info("Exchange rates from cbr have been retrieved, time=$time, exchangeRates=$rates, targetTimestamp=$nextDayTimestamp")
         return ExchangeRates(
             rates = rates,
-            timestamp = time.toEpochMilli()
+            timestamp = nextDayTimestamp
         )
     }
 
