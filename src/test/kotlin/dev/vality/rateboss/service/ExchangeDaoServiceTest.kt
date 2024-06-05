@@ -5,6 +5,7 @@ import dev.vality.rateboss.dao.domain.Tables
 import dev.vality.rateboss.dao.domain.tables.ExRate.EX_RATE
 import dev.vality.rateboss.dao.domain.tables.records.ExRateRecord
 import dev.vality.rateboss.source.model.ExchangeRates
+import dev.vality.rateboss.source.model.ExchangeRatesData
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.jooq.DSLContext
@@ -47,15 +48,22 @@ class ExchangeDaoServiceTest : ContainerConfiguration() {
             timestamp = Instant.now().epochSecond
         )
 
+        val exchangeRatesData = ExchangeRatesData(
+            destinationCurrencySymbolicCode = baseCurrencySymbolCode,
+            destinationCurrencyExponent = baseCurrencyExponent.toShort(),
+            exchangeRates = exchangeRates,
+            sourceId = "source"
+        )
+
         // When
-        exchangeDaoService.saveExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
+        exchangeDaoService.saveExchangeRates(exchangeRatesData)
 
         // Then
         val records = dslContext.fetch(EX_RATE)
 
         assertEquals(exchangeRates.rates.size, records.size)
         val codes = records.stream()
-            .map(ExRateRecord::getDestinationCurrencySymbolicCode)
+            .map(ExRateRecord::getSourceCurrencySymbolicCode)
             .toList()
         assertThat(codes, contains("RUB", "AED", "AMD"))
     }

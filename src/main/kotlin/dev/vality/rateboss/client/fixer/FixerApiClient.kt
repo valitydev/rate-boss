@@ -1,6 +1,6 @@
-package dev.vality.rateboss.client
+package dev.vality.rateboss.client.fixer
 
-import dev.vality.rateboss.client.model.FixerLatestResponse
+import dev.vality.rateboss.client.fixer.model.FixerLatestResponse
 import dev.vality.rateboss.config.properties.RatesProperties
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

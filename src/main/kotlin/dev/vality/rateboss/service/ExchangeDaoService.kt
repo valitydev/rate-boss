@@ -2,9 +2,11 @@ package dev.vality.rateboss.service
 
 import dev.vality.rateboss.converter.ExRateConverter
 import dev.vality.rateboss.dao.ExRateDao
-import dev.vality.rateboss.source.model.ExchangeRateData
-import dev.vality.rateboss.source.model.ExchangeRates
+import dev.vality.rateboss.service.model.ExchangeRateData
+import dev.vality.rateboss.service.model.TimestampExchangeRateRequest
+import dev.vality.rateboss.source.model.ExchangeRatesData
 import mu.KotlinLogging
+import org.apache.commons.math3.fraction.BigFraction
 import org.springframework.stereotype.Service
 
 private val log = KotlinLogging.logger {}
@@ -16,16 +18,15 @@ class ExchangeDaoService(
 ) {
 
     fun saveExchangeRates(
-        baseCurrencySymbolCode: String,
-        baseCurrencyExponent: Short,
-        exchangeRates: ExchangeRates
+        exchangeRatesData: ExchangeRatesData
     ) {
-        val exRates = exchangeRates.rates.map { exchangeRatesMap ->
+        val exRates = exchangeRatesData.exchangeRates.rates.map { exchangeRatesMap ->
             val exRate = exRateConverter.convert(
-                baseCurrencySymbolCode,
-                baseCurrencyExponent,
+                exchangeRatesData.destinationCurrencySymbolicCode,
+                exchangeRatesData.destinationCurrencyExponent,
                 exchangeRatesMap,
-                exchangeRates.timestamp
+                exchangeRatesData.exchangeRates.timestamp,
+                exchangeRatesData.sourceId
             )
             exRate
         }
@@ -34,16 +35,24 @@ class ExchangeDaoService(
         log.info("Successfully save exRate batch with size: {}", exRates.size)
     }
 
-    fun getExRateBySymbolicCodes(sourceCode: String, destinationCode: String): ExchangeRateData? {
-        val exRate = exRateDao.getBySymbolicCodes(sourceCode, destinationCode)
+    fun getRecentExchangeRateBySymbolicCodes(sourceCode: String, destinationCode: String): ExchangeRateData? {
+        val exRate = exRateDao.getRecentBySymbolicCodes(sourceCode, destinationCode)
         return exRate?.let {
             ExchangeRateData(
-                sourceCurrencySymbolicCode = exRate.sourceCurrencySymbolicCode,
-                destinationCurrencySymbolicCode = exRate.destinationCurrencySymbolicCode,
-                rationalP = exRate.rationalP,
-                rationalQ = exRate.rationalQ,
-                rateTimestamp = exRate.rateTimestamp
+                sourceCurrencySymbolicCode = it.sourceCurrencySymbolicCode,
+                destinationCurrencySymbolicCode = it.destinationCurrencySymbolicCode,
+                rationalP = it.rationalP,
+                rationalQ = it.rationalQ,
+                rateTimestamp = it.rateTimestamp,
+                source = it.source
             )
+        }
+    }
+
+    fun getExchangeRateByTimestamp(request: TimestampExchangeRateRequest): BigFraction? {
+        val exRate = exRateDao.getByCodesAndTimestamp(request)
+        return exRate?.let {
+            BigFraction(it.rationalP, it.rationalQ)
         }
     }
 }

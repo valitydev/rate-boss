@@ -1,4 +1,4 @@
-package dev.vality.rateboss.client.model
+package dev.vality.rateboss.client.fixer.model
 
 import java.math.BigDecimal
 import java.time.LocalDate

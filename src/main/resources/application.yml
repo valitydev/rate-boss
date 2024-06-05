@@ -76,13 +76,24 @@ retryTemplate:
   maxAttempts: 5
 
 rates:
-  jobCron: '0 0 0/1 * * ?'
-  jobKey: 'exchange-rate-grabber-master-job'
-  jobTriggerName: 'exchange-rate-grabber-master-job-trigger'
-  currencies:
-    - symbolCode: "USD"
-      exponent: 2
+  fixerJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'fixer-exchange-rate-grabber-master-job'
+    jobTriggerName: 'fixer-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "USD"
+        exponent: 2
+  cbrJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'cbr-exchange-rate-grabber-master-job'
+    jobTriggerName: 'cbr-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "RUB"
+        exponent: 2
   source:
     fixer:
       rootUrl: https://api.apilayer.com/fixer/
       apiKey: CJjxZVaxXZCJCfTzkKFQQP0GzP1ytmB2
+    cbr:
+      rootUrl: https://www.cbr.ru/scripts/XML_daily.asp
+      timeZone: Europe/Moscow
