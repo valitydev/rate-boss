@@ -4,6 +4,8 @@ import dev.vality.rateboss.dao.domain.tables.ExRate.EX_RATE
 import dev.vality.rateboss.dao.domain.tables.pojos.ExRate
 import dev.vality.rateboss.service.model.TimestampExchangeRateRequest
 import org.jooq.DSLContext
+import org.jooq.impl.DSL
+import org.jooq.impl.SQLDataType
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -51,12 +53,13 @@ class ExRateDaoImpl(
 
     override fun getByCodesAndTimestamp(request: TimestampExchangeRateRequest): ExRate? {
         val t = EX_RATE
+        val targetRateDate = request.rateTimestamp.toLocalDate()
         return dsl.selectFrom(t)
             .where(
                 t.DESTINATION_CURRENCY_SYMBOLIC_CODE.eq(request.destinationCurrency)
                     .and(t.SOURCE_CURRENCY_SYMBOLIC_CODE.eq(request.sourceCurrency))
                     .and(t.SOURCE.eq(request.source))
-                    .and(t.RATE_TIMESTAMP.le(request.rateTimestamp))
+                    .and(DSL.cast(t.RATE_TIMESTAMP, SQLDataType.LOCALDATE).lt(targetRateDate))
             ).orderBy(t.RATE_TIMESTAMP.desc())
             .limit(1)
             .fetchOneInto(ExRate::class.java)

@@ -108,7 +108,7 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
             destinationCurrencyExponent = 2
             rationalP = 1398750033
             rationalQ = 125000
-            rateTimestamp = LocalDateTime.now()
+            rateTimestamp = LocalDateTime.now().minusDays(1)
             source = sourceId
         }
         dslContext.insertInto(Tables.EX_RATE)
@@ -117,7 +117,7 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
         val conversionRequest = ConversionRequest()
             .setAmount(100L)
             .setDatetime(
-                exRate.rateTimestamp.plusMinutes(3).format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT))
+                exRate.rateTimestamp.plusDays(1).format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT))
             )
             .setDestination(destinationCurrency)
             .setSource(sourceCurrency)

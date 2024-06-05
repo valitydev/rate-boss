@@ -1,7 +1,6 @@
 package dev.vality.rateboss.job
 
-import dev.vality.rateboss.config.properties.RatesProperties
-import dev.vality.rateboss.extensions.getApplicationContext
+import dev.vality.rateboss.config.properties.CurrencyProperties
 import mu.KotlinLogging
 import org.quartz.*
 import org.springframework.scheduling.quartz.QuartzJobBean
@@ -10,15 +9,19 @@ import java.util.*
 
 private val log = KotlinLogging.logger {}
 
-class ExchangeGrabberMasterJob : QuartzJobBean() {
+abstract class AbstractExchangeGrabberMasterJob : QuartzJobBean() {
 
-    override fun executeInternal(context: JobExecutionContext) {
-        val applicationContext = context.getApplicationContext()
-        val ratesProperties = applicationContext.getBean(RatesProperties::class.java)
-        for (currency in ratesProperties.currencies) {
-            val jobIdentity = "${currency.symbolCode}-currency-job"
-            val jobDetail =
-                JobBuilder.newJob(ExchangeGrabberJob::class.java).withIdentity(jobIdentity).build()
+    fun launchJob(
+        currencies: List<CurrencyProperties>,
+        schedulerFactoryBean: Scheduler,
+        jobType: Class<out Job>,
+        jobName: String
+    ) {
+        for (currency in currencies) {
+            val jobIdentity = "$jobName-${currency.symbolCode}-currency-job"
+            val jobDetail = JobBuilder.newJob(jobType)
+                .withIdentity(jobIdentity)
+                .build()
             val triggerFactoryBean = SimpleTriggerFactoryBean().apply {
                 setPriority(Int.MAX_VALUE)
                 setName(jobIdentity)
@@ -31,13 +34,14 @@ class ExchangeGrabberMasterJob : QuartzJobBean() {
             jobDetail.jobDataMap["currencySymbolCode"] = currency.symbolCode
             jobDetail.jobDataMap["currencyExponent"] = currency.exponent
             try {
-                val schedulerFactoryBean = applicationContext.getBean(Scheduler::class.java)
                 schedulerFactoryBean.scheduleJob(jobDetail, triggerFactoryBean)
             } catch (e: ObjectAlreadyExistsException) {
-                log.warn { "Task still in progress: $jobIdentity" }
+                log.warn { "Task $jobName still in progress: $jobIdentity" }
             } catch (e: Exception) {
-                log.error(e) { "Failed to start scheduler job" }
+                log.error(e) { "Failed to start scheduler job: $jobName" }
             }
         }
     }
+
+    abstract fun getJobName(): String
 }

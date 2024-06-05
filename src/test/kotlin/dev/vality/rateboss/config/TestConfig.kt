@@ -15,10 +15,18 @@ class TestConfig {
     @Bean
     fun testRatesProperties(): RatesProperties {
         return RatesProperties(
-            "cron",
-            "key",
-            "name",
-            listOf(CurrencyProperties("RUB", 2)),
+            JobDescription(
+                "fixer-cron",
+                "fixer-key",
+                "fixer-name",
+                listOf(CurrencyProperties("USD", 2))
+            ),
+            JobDescription(
+                "cbr-cron",
+                "cbr-key",
+                "cbr-name",
+                listOf(CurrencyProperties("RUB", 2))
+            ),
             RatesSourceProperties(
                 FixerProperties("url", "key"),
                 CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow"))

@@ -2,20 +2,23 @@ package dev.vality.rateboss.job
 
 import dev.vality.exrates.events.CurrencyEvent
 import dev.vality.rateboss.ContainerConfiguration
+import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.service.ExchangeDaoService
 import dev.vality.rateboss.service.ExchangeEventService
 import dev.vality.rateboss.source.impl.FixerExchangeRateSource
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.quartz.Scheduler
+import org.quartz.TriggerKey
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.mock.mockito.SpyBean
@@ -28,12 +31,15 @@ import java.util.concurrent.TimeUnit
 
 @SpringBootTest(
     properties = [
-        "rates.jobCron=0/5 * * * * ?",
-        "rates.currencies.[0].symbolCode=USD",
-        "rates.currencies.[0].exponent=2"
+        "rates.fixer-job.jobCron=0/5 * * * * ?",
+        "rates.fixer-job.currencies.[0].symbolCode=USD",
+        "rates.fixer-job.currencies.[0].exponent=2"
     ]
 )
-class UsdExchangeGrabberJobTest : ContainerConfiguration() {
+class FixerExchangeGrabberJobTest : ContainerConfiguration() {
+
+    @SpyBean
+    lateinit var exchangeDaoService: ExchangeDaoService
 
     @SpyBean
     lateinit var exchangeEventService: ExchangeEventService
@@ -41,18 +47,19 @@ class UsdExchangeGrabberJobTest : ContainerConfiguration() {
     @MockBean
     lateinit var kafkaTemplate: KafkaTemplate<String, CurrencyEvent>
 
-    @SpyBean
-    lateinit var exchangeDaoService: ExchangeDaoService
-
     @MockBean
     lateinit var fixerExchangeRateSource: FixerExchangeRateSource
 
     @Autowired
     lateinit var scheduler: Scheduler
 
-    @AfterEach
-    fun tearDown() {
-        scheduler.shutdown()
+    @Autowired
+    @Qualifier("rates-dev.vality.rateboss.config.properties.RatesProperties")
+    lateinit var ratesProperties: RatesProperties
+
+    @BeforeEach
+    fun setUp() {
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
     }
 
     @Test

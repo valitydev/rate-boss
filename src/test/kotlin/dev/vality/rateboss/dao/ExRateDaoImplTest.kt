@@ -142,7 +142,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             destinationCurrencyExponent = 2
             rationalP = 11190000264
             rationalQ = 1000055
-            rateTimestamp = LocalDateTime.now().minusHours(1)
+            rateTimestamp = LocalDateTime.now().minusDays(3)
             source = sourceId
         }
         val secondExRate = ExRate().apply {
@@ -152,7 +152,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             destinationCurrencyExponent = 2
             rationalP = 1119000546
             rationalQ = 1000066
-            rateTimestamp = LocalDateTime.now().minusMinutes(30)
+            rateTimestamp = LocalDateTime.now().minusDays(2)
             source = sourceId
         }
         val thirdExRate = ExRate().apply {
@@ -162,7 +162,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             destinationCurrencyExponent = 2
             rationalP = 1119000229
             rationalQ = 1000077
-            rateTimestamp = LocalDateTime.now().minusMinutes(10)
+            rateTimestamp = LocalDateTime.now().minusDays(1)
             source = sourceId
         }
         dslContext.insertInto(EX_RATE)
@@ -177,7 +177,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             sourceCurrency = sourceCurrency,
             destinationCurrency = destinationCurrency,
             source = sourceId,
-            rateTimestamp = firstExRate.rateTimestamp.minusMinutes(10)
+            rateTimestamp = firstExRate.rateTimestamp.minusDays(1)
         )
         val emptyResult = exRateDao.getByCodesAndTimestamp(requestTimestampBeforeFirstExRate)
 
@@ -187,7 +187,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             sourceCurrency = sourceCurrency,
             destinationCurrency = destinationCurrency,
             source = sourceId,
-            rateTimestamp = secondExRate.rateTimestamp.plusMinutes(3)
+            rateTimestamp = secondExRate.rateTimestamp.plusDays(1)
         )
         val secondResult = exRateDao.getByCodesAndTimestamp(requestTimestampBetweenSecondAndThirdExRate)!!
 
@@ -198,7 +198,7 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             sourceCurrency = sourceCurrency,
             destinationCurrency = destinationCurrency,
             source = sourceId,
-            rateTimestamp = thirdExRate.rateTimestamp.plusMinutes(20)
+            rateTimestamp = thirdExRate.rateTimestamp.plusDays(1)
         )
         val thirdResult = exRateDao.getByCodesAndTimestamp(requestTimestampBetweenAfterThirdExRate)!!
 

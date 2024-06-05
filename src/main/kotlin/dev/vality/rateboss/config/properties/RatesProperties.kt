@@ -9,11 +9,16 @@ import java.time.ZoneId
 @ConstructorBinding
 @ConfigurationProperties(prefix = "rates")
 data class RatesProperties(
+    val fixerJob: JobDescription,
+    val cbrJob: JobDescription,
+    val source: RatesSourceProperties
+)
+
+data class JobDescription(
     val jobCron: String,
     val jobKey: String,
     val jobTriggerName: String,
-    val currencies: List<CurrencyProperties>,
-    val source: RatesSourceProperties
+    val currencies: List<CurrencyProperties>
 )
 
 data class CurrencyProperties(
