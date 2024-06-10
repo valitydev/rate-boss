@@ -7,8 +7,6 @@ import org.quartz.*
 import org.quartz.impl.JobDetailImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
-import java.time.ZoneId
-import java.util.*
 import javax.annotation.PostConstruct
 
 @Configuration
@@ -51,7 +49,6 @@ class JobConfig {
             .withIdentity(ratesProperties.fixerJob.jobTriggerName)
             .withSchedule(
                 CronScheduleBuilder.cronSchedule(ratesProperties.fixerJob.jobCron)
-                    .inTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC")))
             )
             .build()
     }
@@ -69,7 +66,6 @@ class JobConfig {
             .withIdentity(ratesProperties.cbrJob.jobTriggerName)
             .withSchedule(
                 CronScheduleBuilder.cronSchedule(ratesProperties.cbrJob.jobCron)
-                    .inTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC")))
             )
             .build()
     }
