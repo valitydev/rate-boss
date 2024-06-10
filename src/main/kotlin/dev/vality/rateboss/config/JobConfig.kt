@@ -47,9 +47,7 @@ class JobConfig {
         return TriggerBuilder.newTrigger()
             .forJob(fixerExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.fixerJob.jobTriggerName)
-            .withSchedule(
-                CronScheduleBuilder.cronSchedule(ratesProperties.fixerJob.jobCron)
-            )
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.fixerJob.jobCron))
             .build()
     }
 
@@ -64,9 +62,7 @@ class JobConfig {
         return TriggerBuilder.newTrigger()
             .forJob(cbrExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.cbrJob.jobTriggerName)
-            .withSchedule(
-                CronScheduleBuilder.cronSchedule(ratesProperties.cbrJob.jobCron)
-            )
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.cbrJob.jobCron))
             .build()
     }
 }
