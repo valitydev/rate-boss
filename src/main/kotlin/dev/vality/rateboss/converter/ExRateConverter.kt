@@ -4,6 +4,7 @@ import dev.vality.rateboss.dao.domain.tables.pojos.ExRate
 import dev.vality.rateboss.extensions.toRational
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import javax.money.Monetary
@@ -35,6 +36,7 @@ class ExRateConverter {
             rationalQ = rational.denominator
             rateTimestamp = LocalDateTime.ofEpochSecond(exchangeRateTimestamp, 0, ZoneOffset.UTC)
             source = sourceId
+            requestDate = LocalDate.now()
         }
     }
 }
