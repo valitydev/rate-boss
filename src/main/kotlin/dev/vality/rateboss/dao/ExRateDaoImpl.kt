@@ -25,7 +25,8 @@ class ExRateDaoImpl(
                     t.RATIONAL_P,
                     t.RATIONAL_Q,
                     t.RATE_TIMESTAMP,
-                    t.SOURCE
+                    t.SOURCE,
+                    t.REQUEST_DATE
                 ).values(
                     entity.sourceCurrencySymbolicCode,
                     entity.sourceCurrencyExponent,
@@ -34,7 +35,8 @@ class ExRateDaoImpl(
                     entity.rationalP,
                     entity.rationalQ,
                     entity.rateTimestamp,
-                    entity.source
+                    entity.source,
+                    entity.requestDate
                 )
             }
         ).execute()
