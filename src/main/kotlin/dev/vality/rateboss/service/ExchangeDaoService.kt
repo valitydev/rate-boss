@@ -14,28 +14,30 @@ private val log = KotlinLogging.logger {}
 @Service
 class ExchangeDaoService(
     private val exRateDao: ExRateDao,
-    private val exRateConverter: ExRateConverter
+    private val exRateConverter: ExRateConverter,
 ) {
-
-    fun saveExchangeRates(
-        exchangeRatesData: ExchangeRatesData
-    ) {
-        val exRates = exchangeRatesData.exchangeRates.rates.map { exchangeRatesMap ->
-            val exRate = exRateConverter.convert(
-                exchangeRatesData.destinationCurrencySymbolicCode,
-                exchangeRatesData.destinationCurrencyExponent,
-                exchangeRatesMap,
-                exchangeRatesData.exchangeRates.timestamp,
-                exchangeRatesData.sourceId
-            )
-            exRate
-        }
+    fun saveExchangeRates(exchangeRatesData: ExchangeRatesData) {
+        val exRates =
+            exchangeRatesData.exchangeRates.rates.map { exchangeRatesMap ->
+                val exRate =
+                    exRateConverter.convert(
+                        exchangeRatesData.destinationCurrencySymbolicCode,
+                        exchangeRatesData.destinationCurrencyExponent,
+                        exchangeRatesMap,
+                        exchangeRatesData.exchangeRates.timestamp,
+                        exchangeRatesData.sourceId,
+                    )
+                exRate
+            }
         log.debug("Try to save exRate batch {}", exRates)
         exRateDao.saveBatch(exRates)
         log.info("Successfully save exRate batch with size: {}", exRates.size)
     }
 
-    fun getRecentExchangeRateBySymbolicCodes(sourceCode: String, destinationCode: String): ExchangeRateData? {
+    fun getRecentExchangeRateBySymbolicCodes(
+        sourceCode: String,
+        destinationCode: String,
+    ): ExchangeRateData? {
         val exRate = exRateDao.getRecentBySymbolicCodes(sourceCode, destinationCode)
         return exRate?.let {
             ExchangeRateData(
@@ -44,7 +46,7 @@ class ExchangeDaoService(
                 rationalP = it.rationalP,
                 rationalQ = it.rationalQ,
                 rateTimestamp = it.rateTimestamp,
-                source = it.source
+                source = it.source,
             )
         }
     }

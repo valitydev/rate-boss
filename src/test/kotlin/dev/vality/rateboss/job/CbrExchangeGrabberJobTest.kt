@@ -17,8 +17,8 @@ import org.quartz.TriggerKey
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.concurrent.TimeUnit
@@ -27,15 +27,14 @@ import java.util.concurrent.TimeUnit
     properties = [
         "rates.cbr-job.jobCron=0/5 * * * * ?",
         "rates.cbr-job.currencies.[0].symbolCode=RUB",
-        "rates.cbr-job.currencies.[0].exponent=2"
-    ]
+        "rates.cbr-job.currencies.[0].exponent=2",
+    ],
 )
 class CbrExchangeGrabberJobTest : ContainerConfiguration() {
-
-    @SpyBean
+    @MockitoSpyBean
     lateinit var exchangeDaoService: ExchangeDaoService
 
-    @MockBean
+    @MockitoBean
     lateinit var cbrExchangeRateSource: CbrExchangeRateSource
 
     @Autowired
@@ -55,11 +54,12 @@ class CbrExchangeGrabberJobTest : ContainerConfiguration() {
         whenever(cbrExchangeRateSource.getSourceId()).thenReturn("sourceId")
         whenever(cbrExchangeRateSource.getExchangeRate(any())).then {
             ExchangeRates(
-                rates = mapOf(
-                    "USD" to BigDecimal.valueOf(90.593066),
-                    "EUR" to BigDecimal.valueOf(98.376632)
-                ),
-                timestamp = Instant.now().epochSecond
+                rates =
+                    mapOf(
+                        "USD" to BigDecimal.valueOf(90.593066),
+                        "EUR" to BigDecimal.valueOf(98.376632),
+                    ),
+                timestamp = Instant.now().epochSecond,
             )
         }
         await().atMost(5, TimeUnit.SECONDS).untilAsserted {

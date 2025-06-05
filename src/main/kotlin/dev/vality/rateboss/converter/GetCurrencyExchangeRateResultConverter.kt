@@ -10,11 +10,8 @@ import java.time.format.DateTimeFormatter
 
 @Component
 class GetCurrencyExchangeRateResultConverter {
-
-    fun convert(
-        exchangeRateData: ExchangeRateData
-    ): GetCurrencyExchangeRateResult {
-        return GetCurrencyExchangeRateResult().apply {
+    fun convert(exchangeRateData: ExchangeRateData): GetCurrencyExchangeRateResult =
+        GetCurrencyExchangeRateResult().apply {
             currencyData = CurrencyData()
             currencyData.sourceCurrency = exchangeRateData.sourceCurrencySymbolicCode
             currencyData.destinationCurrency = exchangeRateData.destinationCurrencySymbolicCode
@@ -23,7 +20,6 @@ class GetCurrencyExchangeRateResultConverter {
             exchange_rate.q = exchangeRateData.rationalQ
             timestamp = exchangeRateData.rateTimestamp.format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT))
         }
-    }
 }
 
 class Constants {

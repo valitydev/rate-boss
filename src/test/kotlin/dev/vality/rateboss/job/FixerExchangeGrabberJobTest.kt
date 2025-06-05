@@ -20,34 +20,33 @@ import org.quartz.TriggerKey
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
-import org.springframework.util.concurrent.SettableListenableFuture
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.math.BigDecimal
 import java.time.Instant
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 @SpringBootTest(
     properties = [
         "rates.fixer-job.jobCron=0/5 * * * * ?",
         "rates.fixer-job.currencies.[0].symbolCode=USD",
-        "rates.fixer-job.currencies.[0].exponent=2"
-    ]
+        "rates.fixer-job.currencies.[0].exponent=2",
+    ],
 )
 class FixerExchangeGrabberJobTest : ContainerConfiguration() {
-
-    @SpyBean
+    @MockitoSpyBean
     lateinit var exchangeDaoService: ExchangeDaoService
 
-    @SpyBean
+    @MockitoSpyBean
     lateinit var exchangeEventService: ExchangeEventService
 
-    @MockBean
+    @MockitoBean
     lateinit var kafkaTemplate: KafkaTemplate<String, CurrencyEvent>
 
-    @MockBean
+    @MockitoBean
     lateinit var fixerExchangeRateSource: FixerExchangeRateSource
 
     @Autowired
@@ -67,14 +66,15 @@ class FixerExchangeGrabberJobTest : ContainerConfiguration() {
         whenever(fixerExchangeRateSource.getSourceId()).thenReturn("sourceId")
         whenever(fixerExchangeRateSource.getExchangeRate(any())).then {
             ExchangeRates(
-                rates = mapOf(
-                    "AED" to BigDecimal.valueOf(3.593066),
-                    "AMD" to BigDecimal.valueOf(397.376632)
-                ),
-                timestamp = Instant.now().epochSecond
+                rates =
+                    mapOf(
+                        "AED" to BigDecimal.valueOf(3.593066),
+                        "AMD" to BigDecimal.valueOf(397.376632),
+                    ),
+                timestamp = Instant.now().epochSecond,
             )
         }
-        val future = SettableListenableFuture<SendResult<String, CurrencyEvent>>()
+        val future = CompletableFuture<SendResult<String, CurrencyEvent>>()
         whenever(kafkaTemplate.send(any<ProducerRecord<String, CurrencyEvent>>())).thenReturn(future)
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {

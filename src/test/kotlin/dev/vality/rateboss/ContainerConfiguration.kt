@@ -19,16 +19,18 @@ class ContainerConfiguration {
         }
 
         @JvmStatic
-        val postgresql: PostgreSQLContainer<Nothing> = PostgreSQLContainer<Nothing>("postgres:14-alpine").apply {
-            withDatabaseName("postgresql")
-            withUsername("user")
-            withPassword("password")
-        }
+        val postgresql: PostgreSQLContainer<Nothing> =
+            PostgreSQLContainer<Nothing>("postgres:14-alpine").apply {
+                withDatabaseName("postgresql")
+                withUsername("user")
+                withPassword("password")
+            }
 
         @JvmStatic
-        val kafka: KafkaContainer = KafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka").withTag("7.0.1")
-        ).withEmbeddedZookeeper()
+        val kafka: KafkaContainer =
+            KafkaContainer(
+                DockerImageName.parse("confluentinc/cp-kafka").withTag("7.0.1"),
+            ).withEmbeddedZookeeper()
 
         @JvmStatic
         @DynamicPropertySource

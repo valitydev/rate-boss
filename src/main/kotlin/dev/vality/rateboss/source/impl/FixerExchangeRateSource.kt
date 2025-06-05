@@ -9,26 +9,24 @@ import org.springframework.stereotype.Component
 
 @Component
 class FixerExchangeRateSource(
-    private val fixerApiClient: FixerApiClient
+    private val fixerApiClient: FixerApiClient,
 ) : ExchangeRateSource {
-
     override fun getExchangeRate(currencySymbolCode: String): ExchangeRates {
-        val fixerLatestResponse = try {
-            fixerApiClient.getLatest(currencySymbolCode)
-        } catch (e: Exception) {
-            throw ExchangeRateSourceException("Remote client exception", e)
-        }
+        val fixerLatestResponse =
+            try {
+                fixerApiClient.getLatest(currencySymbolCode)
+            } catch (e: Exception) {
+                throw ExchangeRateSourceException("Remote client exception", e)
+            }
         if (!fixerLatestResponse.success) {
             throw ExchangeRateSourceException("Unsuccessful response from FixerApi")
         }
 
         return ExchangeRates(
             rates = fixerLatestResponse.rates!!,
-            timestamp = fixerLatestResponse.timestamp!!
+            timestamp = fixerLatestResponse.timestamp!!,
         )
     }
 
-    override fun getSourceId(): String {
-        return ExRateSources.FIXER
-    }
+    override fun getSourceId(): String = ExRateSources.FIXER
 }

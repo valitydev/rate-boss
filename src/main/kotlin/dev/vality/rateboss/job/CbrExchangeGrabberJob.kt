@@ -13,7 +13,6 @@ import org.springframework.retry.support.RetryTemplate
 private val log = KotlinLogging.logger {}
 
 class CbrExchangeGrabberJob : AbstractExchangeGrabberJob() {
-
     override fun executeInternal(context: JobExecutionContext) {
         val applicationContext = context.getApplicationContext()
         val currencySymbolCode = context.jobDetail.jobDataMap["currencySymbolCode"] as String
@@ -28,12 +27,13 @@ class CbrExchangeGrabberJob : AbstractExchangeGrabberJob() {
     private fun getExchangeRates(
         applicationContext: ApplicationContext,
         exchangeRateSource: ExchangeRateSource,
-        currencySymbolCode: String
+        currencySymbolCode: String,
     ): ExchangeRates {
         val retryTemplate = applicationContext.getBean(RetryTemplate::class.java)
-        val exchangeRates = retryTemplate.execute<ExchangeRates, ExchangeRateSourceException> {
-            exchangeRateSource.getExchangeRate(currencySymbolCode)
-        }
+        val exchangeRates =
+            retryTemplate.execute<ExchangeRates, ExchangeRateSourceException> {
+                exchangeRateSource.getExchangeRate(currencySymbolCode)
+            }
         return exchangeRates
     }
 }

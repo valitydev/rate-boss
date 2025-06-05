@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter
 @XmlRootElement(name = "Valute")
 @XmlAccessorType(XmlAccessType.FIELD)
 class CbrCurrencyData {
-
     @XmlAttribute(name = "ID")
     var id: String? = null
 

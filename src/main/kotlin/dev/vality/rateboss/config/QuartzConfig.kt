@@ -10,7 +10,6 @@ import javax.sql.DataSource
 
 @Configuration
 class QuartzConfig {
-
     @Autowired
     private lateinit var quartzProperties: QuartzProperties
 

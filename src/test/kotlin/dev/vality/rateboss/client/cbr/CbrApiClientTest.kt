@@ -1,7 +1,8 @@
 package dev.vality.rateboss.client.cbr
 
 import dev.vality.rateboss.config.TestConfig
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -16,7 +17,6 @@ import java.time.Instant
 @ContextConfiguration(classes = [CbrApiClient::class])
 @Import(TestConfig::class)
 class CbrApiClientTest {
-
     @Autowired
     lateinit var cbrApiClient: CbrApiClient
 

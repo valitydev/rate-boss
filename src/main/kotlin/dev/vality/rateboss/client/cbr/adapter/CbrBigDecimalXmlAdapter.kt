@@ -4,14 +4,10 @@ import java.math.BigDecimal
 import javax.xml.bind.annotation.adapters.XmlAdapter
 
 class CbrBigDecimalXmlAdapter : XmlAdapter<String, BigDecimal>() {
-
-    override fun unmarshal(stringValue: String?): BigDecimal? {
-        return stringValue?.let {
+    override fun unmarshal(stringValue: String?): BigDecimal? =
+        stringValue?.let {
             BigDecimal(it.replace(',', '.'))
         }
-    }
 
-    override fun marshal(bigDecimalValue: BigDecimal?): String? {
-        return bigDecimalValue?.toString()?.replace('.', ',')
-    }
+    override fun marshal(bigDecimalValue: BigDecimal?): String? = bigDecimalValue?.toString()?.replace('.', ',')
 }

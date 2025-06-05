@@ -13,26 +13,31 @@ import org.springframework.web.util.UriComponentsBuilder
 @Component
 class FixerApiClient(
     private val ratesProperties: RatesProperties,
-    private val restTemplate: RestTemplate
+    private val restTemplate: RestTemplate,
 ) {
-
-    fun getLatest(base: String, symbols: String? = null): FixerLatestResponse {
-        val urlTemplate = UriComponentsBuilder.fromHttpUrl(ratesProperties.source.fixer.rootUrl).apply {
-            path("/latest")
-            queryParam("base", base)
-            if (symbols != null) {
-                queryParam("symbols", symbols)
+    fun getLatest(
+        base: String,
+        symbols: String? = null,
+    ): FixerLatestResponse {
+        val urlTemplate =
+            UriComponentsBuilder.fromHttpUrl(ratesProperties.source.fixer.rootUrl).apply {
+                path("/latest")
+                queryParam("base", base)
+                if (symbols != null) {
+                    queryParam("symbols", symbols)
+                }
+                encode()
+                toUriString()
             }
-            encode()
-            toUriString()
-        }
-        val httpHeaders = HttpHeaders().apply {
-            set("apiKey", ratesProperties.source.fixer.apiKey)
-        }
-        return restTemplate.exchange<FixerLatestResponse>(
-            urlTemplate.toUriString(),
-            HttpMethod.GET,
-            HttpEntity(null, httpHeaders)
-        ).body!!
+        val httpHeaders =
+            HttpHeaders().apply {
+                set("apiKey", ratesProperties.source.fixer.apiKey)
+            }
+        return restTemplate
+            .exchange<FixerLatestResponse>(
+                urlTemplate.toUriString(),
+                HttpMethod.GET,
+                HttpEntity(null, httpHeaders),
+            ).body!!
     }
 }

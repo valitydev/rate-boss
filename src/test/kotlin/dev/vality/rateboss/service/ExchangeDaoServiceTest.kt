@@ -14,13 +14,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
 import java.time.Instant
 
 class ExchangeDaoServiceTest : ContainerConfiguration() {
-
-    @MockBean
+    @MockitoBean
     lateinit var scheduler: Scheduler
 
     @Autowired
@@ -39,21 +38,24 @@ class ExchangeDaoServiceTest : ContainerConfiguration() {
         // Given
         val baseCurrencySymbolCode = "USD"
         val baseCurrencyExponent = 2
-        val exchangeRates = ExchangeRates(
-            rates = mapOf(
-                "RUB" to BigDecimal.valueOf(56.761762),
-                "AED" to BigDecimal.valueOf(3.593066),
-                "AMD" to BigDecimal.valueOf(397.376632)
-            ),
-            timestamp = Instant.now().epochSecond
-        )
+        val exchangeRates =
+            ExchangeRates(
+                rates =
+                    mapOf(
+                        "RUB" to BigDecimal.valueOf(56.761762),
+                        "AED" to BigDecimal.valueOf(3.593066),
+                        "AMD" to BigDecimal.valueOf(397.376632),
+                    ),
+                timestamp = Instant.now().epochSecond,
+            )
 
-        val exchangeRatesData = ExchangeRatesData(
-            destinationCurrencySymbolicCode = baseCurrencySymbolCode,
-            destinationCurrencyExponent = baseCurrencyExponent.toShort(),
-            exchangeRates = exchangeRates,
-            sourceId = "source"
-        )
+        val exchangeRatesData =
+            ExchangeRatesData(
+                destinationCurrencySymbolicCode = baseCurrencySymbolCode,
+                destinationCurrencyExponent = baseCurrencyExponent.toShort(),
+                exchangeRates = exchangeRates,
+                sourceId = "source",
+            )
 
         // When
         exchangeDaoService.saveExchangeRates(exchangeRatesData)
@@ -62,9 +64,11 @@ class ExchangeDaoServiceTest : ContainerConfiguration() {
         val records = dslContext.fetch(EX_RATE)
 
         assertEquals(exchangeRates.rates.size, records.size)
-        val codes = records.stream()
-            .map(ExRateRecord::getSourceCurrencySymbolicCode)
-            .toList()
+        val codes =
+            records
+                .stream()
+                .map(ExRateRecord::getSourceCurrencySymbolicCode)
+                .toList()
         assertThat(codes, contains("RUB", "AED", "AMD"))
     }
 }

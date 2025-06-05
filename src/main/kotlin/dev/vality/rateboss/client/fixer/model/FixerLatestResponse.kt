@@ -8,5 +8,5 @@ data class FixerLatestResponse(
     val date: LocalDate?,
     val rates: Map<String, BigDecimal>?,
     val success: Boolean,
-    val timestamp: Long?
+    val timestamp: Long?,
 )

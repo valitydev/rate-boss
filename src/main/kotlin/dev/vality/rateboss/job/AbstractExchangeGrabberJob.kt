@@ -11,23 +11,23 @@ import org.springframework.scheduling.quartz.QuartzJobBean
 private val log = KotlinLogging.logger {}
 
 abstract class AbstractExchangeGrabberJob : QuartzJobBean() {
-
     fun saveExchangeRates(
         applicationContext: ApplicationContext,
         currencySymbolCode: String,
         currencyExponent: Int,
         exchangeRates: ExchangeRates,
-        sourceId: String
+        sourceId: String,
     ) {
         try {
             val exchangeDaoService = applicationContext.getBean(ExchangeDaoService::class.java)
             log.info { "Save exchange rates for currency=$currencySymbolCode, sourceId=$sourceId" }
-            val exchangeRatesData = ExchangeRatesData(
-                destinationCurrencySymbolicCode = currencySymbolCode,
-                destinationCurrencyExponent = currencyExponent.toShort(),
-                exchangeRates = exchangeRates,
-                sourceId = sourceId
-            )
+            val exchangeRatesData =
+                ExchangeRatesData(
+                    destinationCurrencySymbolicCode = currencySymbolCode,
+                    destinationCurrencyExponent = currencyExponent.toShort(),
+                    exchangeRates = exchangeRates,
+                    sourceId = sourceId,
+                )
             exchangeDaoService.saveExchangeRates(exchangeRatesData)
         } catch (e: Exception) {
             log.error("Couldn't save exchange rates for currency={} ", currencySymbolCode, e)
@@ -38,7 +38,7 @@ abstract class AbstractExchangeGrabberJob : QuartzJobBean() {
         applicationContext: ApplicationContext,
         currencySymbolCode: String,
         currencyExponent: Int,
-        exchangeRates: ExchangeRates
+        exchangeRates: ExchangeRates,
     ) {
         val exchangeEventService = applicationContext.getBean(ExchangeEventService::class.java)
         log.info { "Send exchange rates for currency=$currencySymbolCode" }

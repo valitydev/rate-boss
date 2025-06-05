@@ -13,19 +13,19 @@ private const val DEFAULT_EXPONENT = 2
 
 @Component
 class ExRateConverter {
-
     fun convert(
         baseCurrencySymbolCode: String,
         baseCurrencyExponent: Short,
         exchangeRateMapEntry: Map.Entry<String, BigDecimal>,
         exchangeRateTimestamp: Long,
-        sourceId: String
+        sourceId: String,
     ): ExRate {
-        val exponent = try {
-            Monetary.getCurrency(exchangeRateMapEntry.key).defaultFractionDigits
-        } catch (e: Exception) {
-            DEFAULT_EXPONENT
-        }
+        val exponent =
+            try {
+                Monetary.getCurrency(exchangeRateMapEntry.key).defaultFractionDigits
+            } catch (e: Exception) {
+                DEFAULT_EXPONENT
+            }
         return ExRate().apply {
             destinationCurrencySymbolicCode = baseCurrencySymbolCode
             destinationCurrencyExponent = baseCurrencyExponent

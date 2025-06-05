@@ -15,9 +15,8 @@ import java.time.format.DateTimeFormatter
 @Component
 class CbrApiClient(
     private val restTemplate: RestTemplate,
-    private val ratesProperties: RatesProperties
+    private val ratesProperties: RatesProperties,
 ) {
-
     fun getExchangeRates(time: Instant): CbrExchangeRateData {
         val baseUrl = ratesProperties.source.cbr.rootUrl
         val timezone = ratesProperties.source.cbr.timeZone
@@ -26,13 +25,15 @@ class CbrApiClient(
         return restTemplate.exchange<CbrExchangeRateData>(url, HttpMethod.GET, HttpEntity(null, null)).body!!
     }
 
-    private fun buildUrl(endpoint: String, date: LocalDate): String {
-        return UriComponentsBuilder
+    private fun buildUrl(
+        endpoint: String,
+        date: LocalDate,
+    ): String =
+        UriComponentsBuilder
             .fromUriString(endpoint)
             .queryParam("date_req", date.format(DATE_TIME_FORMATTER))
             .build()
             .toUriString()
-    }
 
     companion object {
         val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")

@@ -8,5 +8,5 @@ data class ExchangeRateData(
     val rationalP: Long,
     val rationalQ: Long,
     val rateTimestamp: LocalDateTime,
-    val source: String
+    val source: String,
 )

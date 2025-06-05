@@ -11,7 +11,6 @@ import javax.annotation.PostConstruct
 
 @Configuration
 class JobConfig {
-
     @Autowired
     private lateinit var schedulerFactoryBean: Scheduler
 
@@ -43,13 +42,13 @@ class JobConfig {
         return jobDetail
     }
 
-    fun fixerExchangeRateGrabberMasterTrigger(): CronTrigger {
-        return TriggerBuilder.newTrigger()
+    fun fixerExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
             .forJob(fixerExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.fixerJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.fixerJob.jobCron))
             .build()
-    }
 
     fun cbrExchangeRateGrabberMasterJob(): JobDetailImpl {
         val jobDetail = JobDetailImpl()
@@ -58,11 +57,11 @@ class JobConfig {
         return jobDetail
     }
 
-    fun cbrExchangeRateGrabberMasterTrigger(): CronTrigger {
-        return TriggerBuilder.newTrigger()
+    fun cbrExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
             .forJob(cbrExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.cbrJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.cbrJob.jobCron))
             .build()
-    }
 }

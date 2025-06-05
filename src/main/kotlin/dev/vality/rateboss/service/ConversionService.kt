@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class ConversionService {
-
-    fun convertAmount(amount: Long, rate: BigFraction): BigFraction {
-        return BigFraction(amount)
+    fun convertAmount(
+        amount: Long,
+        rate: BigFraction,
+    ): BigFraction =
+        BigFraction(amount)
             .multiply(BigFraction(rate.numerator, rate.denominator))
-    }
 }

@@ -5,7 +5,7 @@
     <parent>
         <groupId>dev.vality</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>2.0.3</version>
+        <version>3.1.0</version>
     </parent>
     <artifactId>rate-boss</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -14,8 +14,8 @@
     <properties>
         <server.port>8022</server.port>
         <management.port>8023</management.port>
-        <java.version>17</java.version>
-        <kotlin.version>1.7.10</kotlin.version>
+        <java.version>21</java.version>
+        <kotlin.version>2.1.21</kotlin.version>
         <testcontainers.version>1.17.3</testcontainers.version>
         <exposed.ports>${server.port} ${management.port}</exposed.ports>
         <db.port>5432</db.port>
@@ -94,13 +94,17 @@
         <dependency>
             <groupId>dev.vality.geck</groupId>
             <artifactId>common</artifactId>
-            <version>0.0.1</version>
+            <version>1.0.2</version>
         </dependency>
 
         <!--Third party-->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -149,6 +153,10 @@
             <artifactId>moneta</artifactId>
             <version>1.4</version>
             <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
 
         <!--Test/Dev-->
@@ -238,7 +246,7 @@
                 <version>3.7.1</version>
             </plugin>
             <plugin>
-                <groupId>dev.vality.maven.plugins</groupId>
+                <groupId>dev.crashteam.maven.plugins</groupId>
                 <artifactId>pg-embedded-plugin</artifactId>
                 <version>1.0.1</version>
                 <configuration>
@@ -258,12 +266,19 @@
                     </execution>
                     <execution>
                         <id>PG_server_stop</id>
-                        <phase>compile</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>stop</goal>
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-io</groupId>
+                        <artifactId>commons-io</artifactId>
+                        <version>2.18.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.flywaydb</groupId>
@@ -332,7 +347,6 @@
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-                <version>${kotlin.version}</version>
                 <configuration>
                     <args>
                         <arg>-Xjsr305=strict</arg>
@@ -341,7 +355,6 @@
                         <plugin>spring</plugin>
                         <plugin>jpa</plugin>
                     </compilerPlugins>
-                    <jvmTarget>1.8</jvmTarget>
                 </configuration>
                 <executions>
                     <execution>
@@ -386,7 +399,7 @@
             <plugin>
                 <groupId>com.github.gantsign.maven</groupId>
                 <artifactId>ktlint-maven-plugin</artifactId>
-                <version>1.15.1</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>

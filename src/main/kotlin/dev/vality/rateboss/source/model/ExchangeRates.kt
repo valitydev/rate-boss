@@ -4,5 +4,5 @@ import java.math.BigDecimal
 
 data class ExchangeRates(
     val rates: Map<String, BigDecimal>,
-    val timestamp: Long
+    val timestamp: Long,
 )

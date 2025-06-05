@@ -6,5 +6,5 @@ data class TimestampExchangeRateRequest(
     val sourceCurrency: String,
     val destinationCurrency: String,
     val rateTimestamp: LocalDateTime,
-    val source: String
+    val source: String,
 )
