@@ -23,40 +23,49 @@ private val log = KotlinLogging.logger {}
 
 @Service
 class ExchangeEventService(
-    private val kafkaTemplate: KafkaTemplate<String, CurrencyEvent>
+    private val kafkaTemplate: KafkaTemplate<String, CurrencyEvent>,
 ) {
-
     @Value("\${kafka.topic.producer.exchangeTopic}")
     lateinit var topicName: String
 
     fun sendExchangeRates(
         baseCurrencySymbolCode: String,
         baseCurrencyExponent: Short,
-        exchangeRates: ExchangeRates
+        exchangeRates: ExchangeRates,
     ) {
-        val currencyEvents = exchangeRates.rates.map { exchangeRatesMap ->
-            val eventId = UUID.randomUUID().toString()
-            val eventTime = TypeUtil.temporalToString(LocalDateTime.now(), ZoneOffset.UTC)
-            val payload = buildCurrencyExchangeRatePayload(
-                baseCurrencySymbolCode,
-                baseCurrencyExponent,
-                exchangeRatesMap,
-                exchangeRates.timestamp
-            )
-            CurrencyEvent(eventId, eventTime, payload)
-        }
+        val currencyEvents =
+            exchangeRates.rates.map { exchangeRatesMap ->
+                val eventId = UUID.randomUUID().toString()
+                val eventTime = TypeUtil.temporalToString(LocalDateTime.now(), ZoneOffset.UTC)
+                val payload =
+                    buildCurrencyExchangeRatePayload(
+                        baseCurrencySymbolCode,
+                        baseCurrencyExponent,
+                        exchangeRatesMap,
+                        exchangeRates.timestamp,
+                    )
+                CurrencyEvent(eventId, eventTime, payload)
+            }
         for (currencyEvent in currencyEvents) {
             val producerRecord = ProducerRecord(topicName, currencyEvent.eventId, currencyEvent)
-            kafkaTemplate.send(producerRecord).addCallback(
-                { result ->
-                    log.info {
-                        "Successfully send currency event. Topic=" + result?.recordMetadata?.topic() + ";" +
-                            " Offset=" + result?.recordMetadata?.offset() + ";" +
-                            " Partition=" + result?.recordMetadata?.partition()
+            kafkaTemplate
+                .send(producerRecord)
+                .thenAccept(
+                    { result ->
+                        log.info {
+                            "Successfully send currency event. Topic=" + result?.recordMetadata?.topic() + ";" +
+                                " Offset=" + result?.recordMetadata?.offset() + ";" +
+                                " Partition=" + result?.recordMetadata?.partition()
+                        }
                     }
-                },
-                { log.error(it.cause) { "Failed to send event. Topic=${producerRecord.topic()}; Partition=${producerRecord.partition()}" } }
-            )
+                ).exceptionally(
+                    { err ->
+                        log.error(
+                            err.cause
+                        ) { "Failed to send event. Topic=${producerRecord.topic()}; Partition=${producerRecord.partition()}" }
+                        null
+                    }
+                )
         }
     }
 
@@ -64,30 +73,26 @@ class ExchangeEventService(
         baseCurrencySymbolCode: String,
         baseCurrencyExponent: Short,
         exchangeRateMap: Map.Entry<String, BigDecimal>,
-        exchangeRateTimestamp: Long
-    ): CurrencyEventPayload? {
-        return CurrencyEventPayload.exchange_rate(
+        exchangeRateTimestamp: Long,
+    ): CurrencyEventPayload? =
+        CurrencyEventPayload.exchange_rate(
             CurrencyExchangeRate()
                 .setSourceCurrency(
                     Currency(
                         baseCurrencySymbolCode,
-                        baseCurrencyExponent
-                    )
-                )
-                .setDestinationCurrency(
+                        baseCurrencyExponent,
+                    ),
+                ).setDestinationCurrency(
                     Currency(
                         exchangeRateMap.key,
-                        exchangeRateMap.value.scale().toShort()
-                    )
-                )
-                .setExchangeRate(
+                        exchangeRateMap.value.scale().toShort(),
+                    ),
+                ).setExchangeRate(
                     Rational().apply {
                         val rational = exchangeRateMap.value.toRational()
                         p = rational.numerator
                         q = rational.denominator
-                    }
-                )
-                .setTimestamp(TypeUtil.temporalToString(Instant.ofEpochSecond(exchangeRateTimestamp)))
+                    },
+                ).setTimestamp(TypeUtil.temporalToString(Instant.ofEpochSecond(exchangeRateTimestamp))),
         )
-    }
 }

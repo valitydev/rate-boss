@@ -15,7 +15,6 @@ import org.springframework.kafka.core.ProducerFactory
 
 @Configuration
 class KafkaConfig {
-
     @Autowired
     lateinit var kafkaProperties: KafkaProperties
 
@@ -27,7 +26,7 @@ class KafkaConfig {
         retryBackoffMs: Long,
         batchSize: Int,
         acks: String,
-        deliveryTimeout: Int
+        deliveryTimeout: Int,
     ): Map<String, Any> {
         val props: MutableMap<String, Any> = HashMap(kafkaProperties.buildProducerProperties())
         props[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
@@ -41,22 +40,20 @@ class KafkaConfig {
     }
 
     @Bean
-    fun producerFactory(): ProducerFactory<String, CurrencyEvent> {
-        return DefaultKafkaProducerFactory(
+    fun producerFactory(): ProducerFactory<String, CurrencyEvent> =
+        DefaultKafkaProducerFactory(
             producerConfigs(
                 kafkaCustomProperties.producer.maxRetries,
                 kafkaCustomProperties.producer.retryBackoffMs,
                 kafkaCustomProperties.producer.batchSize,
                 ACKS_CONFIG,
-                kafkaCustomProperties.producer.deliveryTimeoutMs
-            )
+                kafkaCustomProperties.producer.deliveryTimeoutMs,
+            ),
         )
-    }
 
     @Bean
-    fun kafkaTemplate(producerFactory: ProducerFactory<String, CurrencyEvent>): KafkaTemplate<String, CurrencyEvent> {
-        return KafkaTemplate(producerFactory)
-    }
+    fun kafkaTemplate(producerFactory: ProducerFactory<String, CurrencyEvent>): KafkaTemplate<String, CurrencyEvent> =
+        KafkaTemplate(producerFactory)
 
     private companion object {
         const val ACKS_CONFIG = "1"

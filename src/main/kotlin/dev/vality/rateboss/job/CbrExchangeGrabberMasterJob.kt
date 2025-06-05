@@ -6,7 +6,6 @@ import org.quartz.JobExecutionContext
 import org.quartz.Scheduler
 
 class CbrExchangeGrabberMasterJob : AbstractExchangeGrabberMasterJob() {
-
     override fun executeInternal(context: JobExecutionContext) {
         val applicationContext = context.getApplicationContext()
         val ratesProperties = applicationContext.getBean(RatesProperties::class.java)
@@ -15,7 +14,5 @@ class CbrExchangeGrabberMasterJob : AbstractExchangeGrabberMasterJob() {
         launchJob(currencies, schedulerFactoryBean, CbrExchangeGrabberJob::class.java, getJobName())
     }
 
-    override fun getJobName(): String {
-        return "cbrJob"
-    }
+    override fun getJobName(): String = "cbrJob"
 }

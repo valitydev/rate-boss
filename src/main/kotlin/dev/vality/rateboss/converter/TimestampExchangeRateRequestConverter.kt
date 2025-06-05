@@ -9,19 +9,18 @@ import java.time.format.DateTimeFormatter
 
 @Component
 class TimestampExchangeRateRequestConverter {
-
     fun convert(
         conversionRequest: ConversionRequest,
-        sourceId: String
-    ): TimestampExchangeRateRequest {
-        return TimestampExchangeRateRequest(
+        sourceId: String,
+    ): TimestampExchangeRateRequest =
+        TimestampExchangeRateRequest(
             sourceCurrency = conversionRequest.source,
             destinationCurrency = conversionRequest.destination,
             source = sourceId,
-            rateTimestamp = LocalDateTime.parse(
-                conversionRequest.datetime,
-                DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)
-            )
+            rateTimestamp =
+                LocalDateTime.parse(
+                    conversionRequest.datetime,
+                    DateTimeFormatter.ofPattern(DATE_TIME_FORMAT),
+                ),
         )
-    }
 }

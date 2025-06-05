@@ -9,7 +9,6 @@ import org.quartz.Scheduler
 private val log = KotlinLogging.logger {}
 
 class FixerExchangeGrabberMasterJob : AbstractExchangeGrabberMasterJob() {
-
     override fun executeInternal(context: JobExecutionContext) {
         val applicationContext = context.getApplicationContext()
         val ratesProperties = applicationContext.getBean(RatesProperties::class.java)
@@ -18,7 +17,5 @@ class FixerExchangeGrabberMasterJob : AbstractExchangeGrabberMasterJob() {
         launchJob(currencies, schedulerFactoryBean, FixerExchangeGrabberJob::class.java, getJobName())
     }
 
-    override fun getJobName(): String {
-        return "fixerJob"
-    }
+    override fun getJobName(): String = "fixerJob"
 }

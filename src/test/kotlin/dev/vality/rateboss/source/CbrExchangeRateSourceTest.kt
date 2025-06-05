@@ -4,7 +4,6 @@ import dev.vality.rateboss.client.cbr.CbrApiClient
 import dev.vality.rateboss.client.cbr.model.CbrCurrencyData
 import dev.vality.rateboss.client.cbr.model.CbrExchangeRateData
 import dev.vality.rateboss.config.TestConfig
-import dev.vality.rateboss.config.properties.*
 import dev.vality.rateboss.source.impl.CbrExchangeRateSource
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -12,9 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.ResourceAccessException
 import java.math.BigDecimal
@@ -24,11 +23,10 @@ import java.time.LocalDate
 @ContextConfiguration(classes = [CbrApiClient::class, CbrExchangeRateSource::class])
 @Import(TestConfig::class)
 class CbrExchangeRateSourceTest {
-
     @Autowired
     lateinit var exchangeRateSource: ExchangeRateSource
 
-    @MockBean
+    @MockitoBean
     lateinit var cbrApiClient: CbrApiClient
 
     @Test
@@ -36,9 +34,10 @@ class CbrExchangeRateSourceTest {
         val currencySymbolCode = "RUB"
         whenever(cbrApiClient.getExchangeRates(any())).thenThrow(ResourceAccessException("Error"))
 
-        val exception = assertThrows(ExchangeRateSourceException::class.java) {
-            exchangeRateSource.getExchangeRate(currencySymbolCode)
-        }
+        val exception =
+            assertThrows(ExchangeRateSourceException::class.java) {
+                exchangeRateSource.getExchangeRate(currencySymbolCode)
+            }
 
         assertEquals("Remote client exception", exception.message)
     }
@@ -50,9 +49,10 @@ class CbrExchangeRateSourceTest {
         cbrExchangeRateData.currencies = emptyList()
         whenever(cbrApiClient.getExchangeRates(any())).thenReturn(cbrExchangeRateData)
 
-        val exception = assertThrows(ExchangeRateSourceException::class.java) {
-            exchangeRateSource.getExchangeRate(currencySymbolCode)
-        }
+        val exception =
+            assertThrows(ExchangeRateSourceException::class.java) {
+                exchangeRateSource.getExchangeRate(currencySymbolCode)
+            }
 
         assertEquals("Unsuccessful response from CbrApi", exception.message)
     }

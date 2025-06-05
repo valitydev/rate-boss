@@ -10,14 +10,13 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDateTime
 
 @Testcontainers
 class ExRateDaoImplTest : ContainerConfiguration() {
-
-    @MockBean
+    @MockitoBean
     lateinit var scheduler: Scheduler
 
     @Autowired
@@ -33,26 +32,28 @@ class ExRateDaoImplTest : ContainerConfiguration() {
 
     @Test
     fun saveBatchWithSameCodes() {
-        val firstExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = "USD"
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = "UZS"
-            destinationCurrencyExponent = 6
-            rationalP = 11190000264
-            rationalQ = 1000000
-            rateTimestamp = LocalDateTime.now()
-            source = "source"
-        }
-        val secondExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = "USD"
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = "UZS"
-            destinationCurrencyExponent = 6
-            rationalP = 1119000000
-            rationalQ = 1000000
-            rateTimestamp = LocalDateTime.now()
-            source = "source"
-        }
+        val firstExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = "USD"
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = "UZS"
+                destinationCurrencyExponent = 6
+                rationalP = 11190000264
+                rationalQ = 1000000
+                rateTimestamp = LocalDateTime.now()
+                source = "source"
+            }
+        val secondExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = "USD"
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = "UZS"
+                destinationCurrencyExponent = 6
+                rationalP = 1119000000
+                rationalQ = 1000000
+                rateTimestamp = LocalDateTime.now()
+                source = "source"
+            }
         val entities = listOf(firstExRate, secondExRate)
 
         exRateDao.saveBatch(entities)
@@ -65,26 +66,28 @@ class ExRateDaoImplTest : ContainerConfiguration() {
 
     @Test
     fun saveBatch() {
-        val firstExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = "USD"
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = "UZS"
-            destinationCurrencyExponent = 6
-            rationalP = 11190000264
-            rationalQ = 1000000
-            rateTimestamp = LocalDateTime.now()
-            source = "source"
-        }
-        val secondExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = "USD"
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = "RUB"
-            destinationCurrencyExponent = 6
-            rationalP = 1119000000
-            rationalQ = 1000000
-            rateTimestamp = LocalDateTime.now()
-            source = "source"
-        }
+        val firstExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = "USD"
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = "UZS"
+                destinationCurrencyExponent = 6
+                rationalP = 11190000264
+                rationalQ = 1000000
+                rateTimestamp = LocalDateTime.now()
+                source = "source"
+            }
+        val secondExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = "USD"
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = "RUB"
+                destinationCurrencyExponent = 6
+                rationalP = 1119000000
+                rationalQ = 1000000
+                rateTimestamp = LocalDateTime.now()
+                source = "source"
+            }
         val entities = listOf(firstExRate, secondExRate)
 
         exRateDao.saveBatch(entities)
@@ -97,27 +100,30 @@ class ExRateDaoImplTest : ContainerConfiguration() {
     fun getRecentBySymbolicCodes() {
         val sourceCurrency = "USD"
         val destinationCurrency = "UZS"
-        val oldExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = sourceCurrency
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = destinationCurrency
-            destinationCurrencyExponent = 6
-            rationalP = 11190000264
-            rationalQ = 1000000
-            rateTimestamp = LocalDateTime.now().minusHours(1)
-            source = "source"
-        }
-        val recentExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = sourceCurrency
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = destinationCurrency
-            destinationCurrencyExponent = 6
-            rationalP = 1119000000
-            rationalQ = 1000000
-            rateTimestamp = LocalDateTime.now()
-            source = "source"
-        }
-        dslContext.insertInto(EX_RATE)
+        val oldExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 6
+                rationalP = 11190000264
+                rationalQ = 1000000
+                rateTimestamp = LocalDateTime.now().minusHours(1)
+                source = "source"
+            }
+        val recentExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 6
+                rationalP = 1119000000
+                rationalQ = 1000000
+                rateTimestamp = LocalDateTime.now()
+                source = "source"
+            }
+        dslContext
+            .insertInto(EX_RATE)
             .set(dslContext.newRecord(EX_RATE, oldExRate))
             .newRecord()
             .set(dslContext.newRecord(EX_RATE, recentExRate))
@@ -135,37 +141,41 @@ class ExRateDaoImplTest : ContainerConfiguration() {
         val destinationCurrency = "USD"
         val sourceCurrency = "UZS"
         val sourceId = "source"
-        val firstExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = sourceCurrency
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = destinationCurrency
-            destinationCurrencyExponent = 2
-            rationalP = 11190000264
-            rationalQ = 1000055
-            rateTimestamp = LocalDateTime.now().minusDays(3)
-            source = sourceId
-        }
-        val secondExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = sourceCurrency
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = destinationCurrency
-            destinationCurrencyExponent = 2
-            rationalP = 1119000546
-            rationalQ = 1000066
-            rateTimestamp = LocalDateTime.now().minusDays(2)
-            source = sourceId
-        }
-        val thirdExRate = ExRate().apply {
-            sourceCurrencySymbolicCode = sourceCurrency
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = destinationCurrency
-            destinationCurrencyExponent = 2
-            rationalP = 1119000229
-            rationalQ = 1000077
-            rateTimestamp = LocalDateTime.now().minusDays(1)
-            source = sourceId
-        }
-        dslContext.insertInto(EX_RATE)
+        val firstExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 2
+                rationalP = 11190000264
+                rationalQ = 1000055
+                rateTimestamp = LocalDateTime.now().minusDays(3)
+                source = sourceId
+            }
+        val secondExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 2
+                rationalP = 1119000546
+                rationalQ = 1000066
+                rateTimestamp = LocalDateTime.now().minusDays(2)
+                source = sourceId
+            }
+        val thirdExRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 2
+                rationalP = 1119000229
+                rationalQ = 1000077
+                rateTimestamp = LocalDateTime.now().minusDays(1)
+                source = sourceId
+            }
+        dslContext
+            .insertInto(EX_RATE)
             .set(dslContext.newRecord(EX_RATE, firstExRate))
             .newRecord()
             .set(dslContext.newRecord(EX_RATE, secondExRate))
@@ -173,33 +183,36 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             .set(dslContext.newRecord(EX_RATE, thirdExRate))
             .execute()
 
-        val requestTimestampBeforeFirstExRate = TimestampExchangeRateRequest(
-            sourceCurrency = sourceCurrency,
-            destinationCurrency = destinationCurrency,
-            source = sourceId,
-            rateTimestamp = firstExRate.rateTimestamp.minusDays(1)
-        )
+        val requestTimestampBeforeFirstExRate =
+            TimestampExchangeRateRequest(
+                sourceCurrency = sourceCurrency,
+                destinationCurrency = destinationCurrency,
+                source = sourceId,
+                rateTimestamp = firstExRate.rateTimestamp.minusDays(1),
+            )
         val emptyResult = exRateDao.getByCodesAndTimestamp(requestTimestampBeforeFirstExRate)
 
         assertNull(emptyResult)
 
-        val requestTimestampBetweenSecondAndThirdExRate = TimestampExchangeRateRequest(
-            sourceCurrency = sourceCurrency,
-            destinationCurrency = destinationCurrency,
-            source = sourceId,
-            rateTimestamp = secondExRate.rateTimestamp.plusMinutes(10)
-        )
+        val requestTimestampBetweenSecondAndThirdExRate =
+            TimestampExchangeRateRequest(
+                sourceCurrency = sourceCurrency,
+                destinationCurrency = destinationCurrency,
+                source = sourceId,
+                rateTimestamp = secondExRate.rateTimestamp.plusMinutes(10),
+            )
         val secondResult = exRateDao.getByCodesAndTimestamp(requestTimestampBetweenSecondAndThirdExRate)!!
 
         assertEquals(secondExRate.rationalP, secondResult.rationalP)
         assertEquals(secondExRate.rationalQ, secondResult.rationalQ)
 
-        val requestTimestampBetweenAfterThirdExRate = TimestampExchangeRateRequest(
-            sourceCurrency = sourceCurrency,
-            destinationCurrency = destinationCurrency,
-            source = sourceId,
-            rateTimestamp = thirdExRate.rateTimestamp.plusMinutes(10)
-        )
+        val requestTimestampBetweenAfterThirdExRate =
+            TimestampExchangeRateRequest(
+                sourceCurrency = sourceCurrency,
+                destinationCurrency = destinationCurrency,
+                source = sourceId,
+                rateTimestamp = thirdExRate.rateTimestamp.plusMinutes(10),
+            )
         val thirdResult = exRateDao.getByCodesAndTimestamp(requestTimestampBetweenAfterThirdExRate)!!
 
         assertEquals(thirdExRate.rationalP, thirdResult.rationalP)

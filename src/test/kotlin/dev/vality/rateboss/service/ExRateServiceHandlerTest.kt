@@ -15,15 +15,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Testcontainers
 class ExRateServiceHandlerTest : ContainerConfiguration() {
-
-    @MockBean
+    @MockitoBean
     lateinit var scheduler: Scheduler
 
     @Autowired
@@ -41,12 +40,13 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
     fun getExchangeRateWithoutData() {
         val sourceCurrency = "USD"
         val destinationCurrency = "UZS"
-        val request = GetCurrencyExchangeRateRequest()
-            .setCurrencyData(
-                CurrencyData()
-                    .setSourceCurrency(sourceCurrency)
-                    .setDestinationCurrency(destinationCurrency)
-            )
+        val request =
+            GetCurrencyExchangeRateRequest()
+                .setCurrencyData(
+                    CurrencyData()
+                        .setSourceCurrency(sourceCurrency)
+                        .setDestinationCurrency(destinationCurrency),
+                )
         assertThrows<ExRateNotFound> { exRateServiceHandler.getExchangeRateData(request) }
     }
 
@@ -55,25 +55,28 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
         val sourceCurrency = "USD"
         val destinationCurrency = "UZS"
         val sourceId = "sourceId"
-        val exRate = ExRate().apply {
-            sourceCurrencySymbolicCode = sourceCurrency
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = destinationCurrency
-            destinationCurrencyExponent = 6
-            rationalP = 11190000264
-            rationalQ = 1000000
-            rateTimestamp = LocalDateTime.now()
-            source = sourceId
-        }
-        dslContext.insertInto(Tables.EX_RATE)
+        val exRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 6
+                rationalP = 11190000264
+                rationalQ = 1000000
+                rateTimestamp = LocalDateTime.now()
+                source = sourceId
+            }
+        dslContext
+            .insertInto(Tables.EX_RATE)
             .set(dslContext.newRecord(Tables.EX_RATE, exRate))
             .execute()
-        val request = GetCurrencyExchangeRateRequest()
-            .setCurrencyData(
-                CurrencyData()
-                    .setSourceCurrency(sourceCurrency)
-                    .setDestinationCurrency(destinationCurrency)
-            )
+        val request =
+            GetCurrencyExchangeRateRequest()
+                .setCurrencyData(
+                    CurrencyData()
+                        .setSourceCurrency(sourceCurrency)
+                        .setDestinationCurrency(destinationCurrency),
+                )
 
         val result = exRateServiceHandler.getExchangeRateData(request)
 
@@ -83,13 +86,13 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
 
     @Test
     fun getEmptyExRateForConvertedAmount() {
-        val conversionRequest = ConversionRequest()
-            .setAmount(100L)
-            .setDatetime(
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT))
-            )
-            .setDestination("USD")
-            .setSource("UZS")
+        val conversionRequest =
+            ConversionRequest()
+                .setAmount(100L)
+                .setDatetime(
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)),
+                ).setDestination("USD")
+                .setSource("UZS")
 
         assertThrows(ExRateNotFound::class.java) {
             exRateServiceHandler.getConvertedAmount("sourceId", conversionRequest)
@@ -101,26 +104,28 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
         val sourceCurrency = "UZS"
         val destinationCurrency = "USD"
         val sourceId = "sourceId"
-        val exRate = ExRate().apply {
-            sourceCurrencySymbolicCode = sourceCurrency
-            sourceCurrencyExponent = 2
-            destinationCurrencySymbolicCode = destinationCurrency
-            destinationCurrencyExponent = 2
-            rationalP = 1398750033
-            rationalQ = 125000
-            rateTimestamp = LocalDateTime.now().minusDays(1)
-            source = sourceId
-        }
-        dslContext.insertInto(Tables.EX_RATE)
+        val exRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 2
+                rationalP = 1398750033
+                rationalQ = 125000
+                rateTimestamp = LocalDateTime.now().minusDays(1)
+                source = sourceId
+            }
+        dslContext
+            .insertInto(Tables.EX_RATE)
             .set(dslContext.newRecord(Tables.EX_RATE, exRate))
             .execute()
-        val conversionRequest = ConversionRequest()
-            .setAmount(100L)
-            .setDatetime(
-                exRate.rateTimestamp.plusMinutes(10).format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT))
-            )
-            .setDestination(destinationCurrency)
-            .setSource(sourceCurrency)
+        val conversionRequest =
+            ConversionRequest()
+                .setAmount(100L)
+                .setDatetime(
+                    exRate.rateTimestamp.plusMinutes(10).format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)),
+                ).setDestination(destinationCurrency)
+                .setSource(sourceCurrency)
 
         val result = exRateServiceHandler.getConvertedAmount(sourceId, conversionRequest)
 

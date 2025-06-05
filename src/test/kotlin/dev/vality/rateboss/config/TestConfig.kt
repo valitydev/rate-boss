@@ -8,29 +8,27 @@ import java.time.ZoneId
 
 @TestConfiguration
 class TestConfig {
-
     @Bean
     fun testRestTemplate() = RestTemplate()
 
     @Bean
-    fun testRatesProperties(): RatesProperties {
-        return RatesProperties(
+    fun testRatesProperties(): RatesProperties =
+        RatesProperties(
             JobDescription(
                 "fixer-cron",
                 "fixer-key",
                 "fixer-name",
-                listOf(CurrencyProperties("USD", 2))
+                listOf(CurrencyProperties("USD", 2)),
             ),
             JobDescription(
                 "cbr-cron",
                 "cbr-key",
                 "cbr-name",
-                listOf(CurrencyProperties("RUB", 2))
+                listOf(CurrencyProperties("RUB", 2)),
             ),
             RatesSourceProperties(
                 FixerProperties("url", "key"),
-                CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow"))
-            )
+                CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow")),
+            ),
         )
-    }
 }

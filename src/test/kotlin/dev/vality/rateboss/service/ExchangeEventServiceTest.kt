@@ -12,21 +12,20 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import java.math.BigDecimal
 import java.time.Instant
 
 class ExchangeEventServiceTest : ContainerConfiguration() {
-
-    @MockBean
+    @MockitoBean
     lateinit var scheduler: Scheduler
 
     @Autowired
     lateinit var exchangeEventService: ExchangeEventService
 
-    @SpyBean
+    @MockitoSpyBean
     lateinit var kafkaTemplate: KafkaTemplate<String, CurrencyEvent>
 
     @Test
@@ -34,14 +33,16 @@ class ExchangeEventServiceTest : ContainerConfiguration() {
         // Given
         val baseCurrencySymbolCode = "USD"
         val baseCurrencyExponent = 2
-        val exchangeRates = ExchangeRates(
-            rates = mapOf(
-                "RUB" to BigDecimal.valueOf(56.761762),
-                "AED" to BigDecimal.valueOf(3.593066),
-                "AMD" to BigDecimal.valueOf(397.376632)
-            ),
-            timestamp = Instant.now().epochSecond
-        )
+        val exchangeRates =
+            ExchangeRates(
+                rates =
+                    mapOf(
+                        "RUB" to BigDecimal.valueOf(56.761762),
+                        "AED" to BigDecimal.valueOf(3.593066),
+                        "AMD" to BigDecimal.valueOf(397.376632),
+                    ),
+                timestamp = Instant.now().epochSecond,
+            )
 
         // When
         exchangeEventService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
@@ -57,13 +58,15 @@ class ExchangeEventServiceTest : ContainerConfiguration() {
         val baseCurrencyExponent = 2
         val rubExchangeRate = BigDecimal.valueOf(56.761762)
         val btcExchangeRate = BigDecimal.valueOf(5.0203877e-05)
-        val exchangeRates = ExchangeRates(
-            rates = mapOf(
-                "RUB" to rubExchangeRate,
-                "BTC" to btcExchangeRate
-            ),
-            timestamp = Instant.now().epochSecond
-        )
+        val exchangeRates =
+            ExchangeRates(
+                rates =
+                    mapOf(
+                        "RUB" to rubExchangeRate,
+                        "BTC" to btcExchangeRate,
+                    ),
+                timestamp = Instant.now().epochSecond,
+            )
 
         // When
         exchangeEventService.sendExchangeRates(baseCurrencySymbolCode, baseCurrencyExponent.toShort(), exchangeRates)
@@ -74,10 +77,31 @@ class ExchangeEventServiceTest : ContainerConfiguration() {
         val firstRecordCurrencyEvent = argumentCaptor.allValues[0].value()
         val secondRecordCurrencyEvent = argumentCaptor.allValues[1].value()
         val firstRecordExchangeRate =
-            BigDecimal.valueOf(firstRecordCurrencyEvent.getPayload().exchangeRate.exchange_rate.p)
-                .divideAndRemainder(BigDecimal.valueOf(firstRecordCurrencyEvent.getPayload().exchangeRate.exchange_rate.q))
-        val secondRecordExchangeRate = BigDecimal.valueOf(secondRecordCurrencyEvent.getPayload().exchangeRate.exchange_rate.p)
-            .divide(BigDecimal.valueOf(secondRecordCurrencyEvent.getPayload().exchangeRate.exchange_rate.q))
+            BigDecimal
+                .valueOf(
+                    firstRecordCurrencyEvent
+                        .getPayload()
+                        .exchangeRate.exchange_rate.p,
+                ).divideAndRemainder(
+                    BigDecimal.valueOf(
+                        firstRecordCurrencyEvent
+                            .getPayload()
+                            .exchangeRate.exchange_rate.q,
+                    ),
+                )
+        val secondRecordExchangeRate =
+            BigDecimal
+                .valueOf(
+                    secondRecordCurrencyEvent
+                        .getPayload()
+                        .exchangeRate.exchange_rate.p,
+                ).divide(
+                    BigDecimal.valueOf(
+                        secondRecordCurrencyEvent
+                            .getPayload()
+                            .exchangeRate.exchange_rate.q,
+                    ),
+                )
         assertTrue(BigDecimal("${firstRecordExchangeRate[0]}.${firstRecordExchangeRate[1]}") == rubExchangeRate)
         assertTrue(secondRecordExchangeRate == btcExchangeRate)
     }
