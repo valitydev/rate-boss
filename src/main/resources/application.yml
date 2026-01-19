@@ -90,6 +90,13 @@ rates:
     currencies:
       - symbolCode: "RUB"
         exponent: 2
+  nbkzJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'nbkz-exchange-rate-grabber-master-job'
+    jobTriggerName: 'nbkz-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "KZT"
+        exponent: 2
   source:
     fixer:
       rootUrl: https://api.apilayer.com/fixer/
@@ -97,3 +104,7 @@ rates:
     cbr:
       rootUrl: https://www.cbr.ru/scripts/XML_daily.asp
       timeZone: Europe/Moscow
+    nbkz:
+      rootUrl: https://nationalbank.kz/rss/get_rates.cfm
+      dateFormat: dd.MM.yyyy
+      timeZone: Asia/Almaty

@@ -3,6 +3,7 @@ package dev.vality.rateboss.config
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.job.CbrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.FixerExchangeGrabberMasterJob
+import dev.vality.rateboss.job.NbkzExchangeGrabberMasterJob
 import org.quartz.*
 import org.quartz.impl.JobDetailImpl
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,6 +32,13 @@ class JobConfig {
             schedulerFactoryBean.addJob(cbrExchangeRateGrabberMasterJob(), true, true)
             if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.cbrJob.jobTriggerName))) {
                 schedulerFactoryBean.scheduleJob(cbrExchangeRateGrabberMasterTrigger())
+            }
+        }
+        val nbkzJobTriggerName = ratesProperties.nbkzJob.jobTriggerName
+        if (nbkzJobTriggerName.isNotEmpty()) {
+            schedulerFactoryBean.addJob(nbkzExchangeRateGrabberMasterJob(), true, true)
+            if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))) {
+                schedulerFactoryBean.scheduleJob(nbkzExchangeRateGrabberMasterTrigger())
             }
         }
     }
@@ -63,5 +71,20 @@ class JobConfig {
             .forJob(cbrExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.cbrJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.cbrJob.jobCron))
+            .build()
+
+    fun nbkzExchangeRateGrabberMasterJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(ratesProperties.nbkzJob.jobKey)
+        jobDetail.jobClass = NbkzExchangeGrabberMasterJob::class.java
+        return jobDetail
+    }
+
+    fun nbkzExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
+            .forJob(nbkzExchangeRateGrabberMasterJob())
+            .withIdentity(ratesProperties.nbkzJob.jobTriggerName)
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbkzJob.jobCron))
             .build()
 }

@@ -9,6 +9,7 @@ import java.time.ZoneId
 data class RatesProperties(
     val fixerJob: JobDescription,
     val cbrJob: JobDescription,
+    val nbkzJob: JobDescription,
     val source: RatesSourceProperties,
 )
 
@@ -27,6 +28,7 @@ data class CurrencyProperties(
 data class RatesSourceProperties(
     val fixer: FixerProperties,
     val cbr: CbrProperties,
+    val nbkz: NbkzProperties,
 )
 
 data class FixerProperties(
@@ -36,5 +38,11 @@ data class FixerProperties(
 
 data class CbrProperties(
     val rootUrl: String,
+    val timeZone: ZoneId,
+)
+
+data class NbkzProperties(
+    val rootUrl: String,
+    val dateFormat: String,
     val timeZone: ZoneId,
 )

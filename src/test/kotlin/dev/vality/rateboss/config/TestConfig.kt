@@ -26,9 +26,16 @@ class TestConfig {
                 "cbr-name",
                 listOf(CurrencyProperties("RUB", 2)),
             ),
+            JobDescription(
+                "nbkz-cron",
+                "nbkz-key",
+                "nbkz-name",
+                listOf(CurrencyProperties("KZT", 2)),
+            ),
             RatesSourceProperties(
                 FixerProperties("url", "key"),
                 CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow")),
+                NbkzProperties("https://nationalbank.kz/rss/get_rates.cfm", "dd.MM.yyyy", ZoneId.of("Asia/Almaty")),
             ),
         )
 }

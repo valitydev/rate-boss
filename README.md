@@ -1,13 +1,29 @@
-# rate-boss![]
-![Rate-boss scheme](doc/rate-boss.png)
+# rate-boss
 
-The essence of the service is quite simple. It collects exchange rate data from some source and stores it in a kafka topic
+Rate-boss periodically pulls exchange rates from external sources, stores them in the database, and optionally publishes rate events to Kafka. It also exposes API endpoints to read the latest or historical rates and to convert amounts by timestamp.
 
-Currency exchange rate is collected according to a specific schedule cron, which we specify in the configuration file.
-We use quartz cluster mode to support the work of our service in multi node mode.
+Supported sources today: Fixer, CBR, NBKZ.
 
-![Rate-boss scheme](doc/rate-boss-quartz.png)
+## Service flow (actual)
 
-Quartz execute like this. First, we have `ExchangeGrabberMasterJob` its job is to take the list of currencies from the configuration
-and create jobs `ExchangeGrabberJob` for each currency. `ExchangeGrabberJob` makes a request to a certain source of exchange rates
-and send the received rates into kafka topic.
+```mermaid
+flowchart TD
+  subgraph Quartz Scheduler
+    M[ExchangeGrabberMasterJob<br/>per source] -->|per currency| J[ExchangeGrabberJob]
+  end
+
+  J -->|HTTP fetch| S[ExchangeRateSource<br/>Fixer / CBR / NBKZ]
+  S -->|rates + timestamp| D[ExchangeDaoService]
+  D -->|save batch| DB[(PostgreSQL<br/>rb.ex_rate)]
+  J -->|optional publish| E[ExchangeEventService]
+  E --> K[(Kafka topic)]
+
+  API[ExchangeRateServiceSrv] -->|getExchangeRateData / getConvertedAmount| DB
+```
+
+## Quartz execution
+
+For each configured source:
+- `ExchangeGrabberMasterJob` reads the list of base currencies from `rates.*Job.currencies`.
+- It spawns `ExchangeGrabberJob` per currency.
+- Each `ExchangeGrabberJob` calls the respective `ExchangeRateSource`, saves the rates, and (for some sources) emits Kafka events.
