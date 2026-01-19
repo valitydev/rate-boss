@@ -67,7 +67,7 @@ class ExchangeDaoServiceTest : ContainerConfiguration() {
         val codes =
             records
                 .stream()
-                .map(ExRateRecord::getSourceCurrencySymbolicCode)
+                .map(ExRateRecord::getDestinationCurrencySymbolicCode)
                 .toList()
         assertThat(codes, contains("RUB", "AED", "AMD"))
     }

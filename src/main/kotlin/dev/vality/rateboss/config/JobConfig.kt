@@ -7,6 +7,7 @@ import dev.vality.rateboss.job.NbkzExchangeGrabberMasterJob
 import org.quartz.*
 import org.quartz.impl.JobDetailImpl
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import javax.annotation.PostConstruct
 
@@ -18,6 +19,9 @@ class JobConfig {
     @Autowired
     private lateinit var ratesProperties: RatesProperties
 
+    @Value("\${rates.run-on-startup:true}")
+    private var runOnStartup: Boolean = true
+
     @PostConstruct
     fun init() {
         val fixerJobTriggerName = ratesProperties.fixerJob.jobTriggerName
@@ -26,6 +30,9 @@ class JobConfig {
             if (!schedulerFactoryBean.checkExists(TriggerKey(fixerJobTriggerName))) {
                 schedulerFactoryBean.scheduleJob(fixerExchangeRateGrabberMasterTrigger())
             }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.fixerJob.jobKey))
+            }
         }
         val cbrJobTriggerName = ratesProperties.cbrJob.jobTriggerName
         if (cbrJobTriggerName.isNotEmpty()) {
@@ -33,12 +40,18 @@ class JobConfig {
             if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.cbrJob.jobTriggerName))) {
                 schedulerFactoryBean.scheduleJob(cbrExchangeRateGrabberMasterTrigger())
             }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.cbrJob.jobKey))
+            }
         }
         val nbkzJobTriggerName = ratesProperties.nbkzJob.jobTriggerName
         if (nbkzJobTriggerName.isNotEmpty()) {
             schedulerFactoryBean.addJob(nbkzExchangeRateGrabberMasterJob(), true, true)
             if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))) {
                 schedulerFactoryBean.scheduleJob(nbkzExchangeRateGrabberMasterTrigger())
+            }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbkzJob.jobKey))
             }
         }
     }
