@@ -8,6 +8,7 @@ import dev.vality.rateboss.ContainerConfiguration
 import dev.vality.rateboss.converter.Constants
 import dev.vality.rateboss.dao.domain.Tables
 import dev.vality.rateboss.dao.domain.tables.pojos.ExRate
+import org.apache.commons.math3.fraction.BigFraction
 import org.jooq.DSLContext
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -85,6 +86,40 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
     }
 
     @Test
+    fun getExchangeRateDataFromNbkz() {
+        val sourceCurrency = "KZT"
+        val destinationCurrency = "USD"
+        val sourceId = "nbkz"
+        val exRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 2
+                rationalP = 4701200
+                rationalQ = 10000
+                rateTimestamp = LocalDateTime.now()
+                source = sourceId
+            }
+        dslContext
+            .insertInto(Tables.EX_RATE)
+            .set(dslContext.newRecord(Tables.EX_RATE, exRate))
+            .execute()
+        val request =
+            GetCurrencyExchangeRateRequest()
+                .setCurrencyData(
+                    CurrencyData()
+                        .setSourceCurrency(sourceCurrency)
+                        .setDestinationCurrency(destinationCurrency),
+                )
+
+        val result = exRateServiceHandler.getExchangeRateData(request)
+
+        assertEquals(exRate.rationalQ, result.exchange_rate.q)
+        assertEquals(exRate.rationalP, result.exchange_rate.p)
+    }
+
+    @Test
     fun getEmptyExRateForConvertedAmount() {
         val conversionRequest =
             ConversionRequest()
@@ -132,5 +167,44 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
         assertNotNull(result)
         assertEquals(exRate.rationalP, result.p)
         assertEquals(exRate.rationalQ / conversionRequest.amount, result.q)
+    }
+
+    @Test
+    fun getSuccessConvertedAmountFromNbkz() {
+        val sourceCurrency = "KZT"
+        val destinationCurrency = "USD"
+        val sourceId = "nbkz"
+        val exRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = sourceCurrency
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = destinationCurrency
+                destinationCurrencyExponent = 2
+                rationalP = 4701200
+                rationalQ = 10000
+                rateTimestamp = LocalDateTime.now().minusDays(1)
+                source = sourceId
+            }
+        dslContext
+            .insertInto(Tables.EX_RATE)
+            .set(dslContext.newRecord(Tables.EX_RATE, exRate))
+            .execute()
+        val conversionRequest =
+            ConversionRequest()
+                .setAmount(100L)
+                .setDatetime(
+                    exRate.rateTimestamp.plusMinutes(10).format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)),
+                ).setDestination(destinationCurrency)
+                .setSource(sourceCurrency)
+
+        val result = exRateServiceHandler.getConvertedAmount(sourceId, conversionRequest)
+
+        val expected =
+            BigFraction(conversionRequest.amount)
+                .multiply(BigFraction(exRate.rationalP, exRate.rationalQ))
+
+        assertNotNull(result)
+        assertEquals(expected.numeratorAsLong, result.p)
+        assertEquals(expected.denominatorAsLong, result.q)
     }
 }
