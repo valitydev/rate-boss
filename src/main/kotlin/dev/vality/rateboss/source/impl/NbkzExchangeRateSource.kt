@@ -34,17 +34,17 @@ class NbkzExchangeRateSource(
             } catch (e: Exception) {
                 throw ExchangeRateSourceException("Remote client exception", e)
             }
-        val rates = parseRates(response)
+        val rates =
+            try {
+                parseRates(response)
+            } catch (e: Exception) {
+                throw ExchangeRateSourceException("Failed to parse response from NbkzApi", e)
+            }
         if (rates.isEmpty()) {
             throw ExchangeRateSourceException("Unsuccessful response from NbkzApi")
         }
         val nextDayTimestamp = date.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC)
-        log.info(
-            "Exchange rates from nbkz have been retrieved, date={}, exchangeRates={}, targetTimestamp={}",
-            date,
-            rates,
-            nextDayTimestamp
-        )
+        log.info { "Exchange rates from nbkz have been retrieved, date=$date, exchangeRates=$rates, targetTimestamp=$nextDayTimestamp" }
         return ExchangeRates(
             rates = rates,
             timestamp = nextDayTimestamp,
