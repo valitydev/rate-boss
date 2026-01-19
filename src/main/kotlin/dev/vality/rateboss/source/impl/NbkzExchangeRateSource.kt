@@ -27,7 +27,7 @@ class NbkzExchangeRateSource(
     override fun getExchangeRate(currencySymbolCode: String): ExchangeRates {
         val timeZone = ratesProperties.source.nbkz.timeZone
         val date = LocalDate.now(timeZone)
-        log.info("Trying to get exchange rates from nbkz for currency={}, date={}", currencySymbolCode, date)
+        log.info { "Trying to get exchange rates from nbkz for currency=$currencySymbolCode, date=$date" }
         val response =
             try {
                 nbkzApiClient.getExchangeRates(date)
