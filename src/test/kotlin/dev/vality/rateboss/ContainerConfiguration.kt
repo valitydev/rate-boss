@@ -42,6 +42,7 @@ class ContainerConfiguration {
             registry.add("spring.flyway.url", postgresql::getJdbcUrl)
             registry.add("spring.flyway.user", postgresql::getUsername)
             registry.add("spring.flyway.password", postgresql::getPassword)
+            registry.add("rates.run-on-startup") { "false" }
         }
     }
 }

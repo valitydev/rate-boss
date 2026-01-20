@@ -27,10 +27,10 @@ class ExRateConverter {
                 DEFAULT_EXPONENT
             }
         return ExRate().apply {
-            destinationCurrencySymbolicCode = baseCurrencySymbolCode
-            destinationCurrencyExponent = baseCurrencyExponent
-            sourceCurrencySymbolicCode = exchangeRateMapEntry.key
-            sourceCurrencyExponent = exponent.toShort()
+            sourceCurrencySymbolicCode = baseCurrencySymbolCode
+            sourceCurrencyExponent = baseCurrencyExponent
+            destinationCurrencySymbolicCode = exchangeRateMapEntry.key
+            destinationCurrencyExponent = exponent.toShort()
             val rational = exchangeRateMapEntry.value.toRational()
             rationalP = rational.numerator
             rationalQ = rational.denominator

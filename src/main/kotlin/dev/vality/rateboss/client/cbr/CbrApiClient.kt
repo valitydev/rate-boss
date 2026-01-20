@@ -1,6 +1,5 @@
 package dev.vality.rateboss.client.cbr
 
-import dev.vality.rateboss.client.cbr.model.CbrExchangeRateData
 import dev.vality.rateboss.config.properties.RatesProperties
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
@@ -17,12 +16,12 @@ class CbrApiClient(
     private val restTemplate: RestTemplate,
     private val ratesProperties: RatesProperties,
 ) {
-    fun getExchangeRates(time: Instant): CbrExchangeRateData {
+    fun getExchangeRates(time: Instant): String {
         val baseUrl = ratesProperties.source.cbr.rootUrl
         val timezone = ratesProperties.source.cbr.timeZone
         val date = time.atZone(timezone).toLocalDate()
         val url = buildUrl(baseUrl, date)
-        return restTemplate.exchange<CbrExchangeRateData>(url, HttpMethod.GET, HttpEntity(null, null)).body!!
+        return restTemplate.exchange<String>(url, HttpMethod.GET, HttpEntity(null, null)).body!!
     }
 
     private fun buildUrl(
