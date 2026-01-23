@@ -3,6 +3,7 @@ package dev.vality.rateboss.dao
 import dev.vality.exrates.service.CurrencyData
 import dev.vality.exrates.service.GetCurrencyExchangeRateRequest
 import dev.vality.rateboss.ContainerConfiguration
+import dev.vality.rateboss.converter.Constants.Companion.DATE_TIME_FORMAT
 import dev.vality.rateboss.dao.domain.Tables.EX_RATE
 import dev.vality.rateboss.dao.domain.tables.pojos.ExRate
 import dev.vality.rateboss.service.model.TimestampExchangeRateRequest
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.testcontainers.junit.jupiter.Testcontainers
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Testcontainers
 class ExRateDaoImplTest : ContainerConfiguration() {
@@ -134,7 +136,9 @@ class ExRateDaoImplTest : ContainerConfiguration() {
         val request =
             GetCurrencyExchangeRateRequest(
                 CurrencyData(sourceCurrency, destinationCurrency)
-            ).setDatetime(recentExRate.rateTimestamp.minusDays(1).toString())
+            ).setDatetime(
+                recentExRate.rateTimestamp.minusDays(1).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT))
+            )
         val result = exRateDao.getRecentBySymbolicCodes(request)
 
         assertEquals(recentExRate.rationalP, result?.rationalP)
