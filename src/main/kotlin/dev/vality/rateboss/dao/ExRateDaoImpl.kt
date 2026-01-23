@@ -1,5 +1,7 @@
 package dev.vality.rateboss.dao
 
+import dev.vality.exrates.service.GetCurrencyExchangeRateRequest
+import dev.vality.rateboss.converter.Constants.Companion.DATE_TIME_FORMAT
 import dev.vality.rateboss.dao.domain.tables.ExRate.EX_RATE
 import dev.vality.rateboss.dao.domain.tables.pojos.ExRate
 import dev.vality.rateboss.service.model.TimestampExchangeRateRequest
@@ -7,6 +9,8 @@ import org.jooq.DSLContext
 import org.jooq.impl.DSL
 import org.jooq.impl.SQLDataType
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Repository
 class ExRateDaoImpl(
@@ -44,18 +48,33 @@ class ExRateDaoImpl(
             ).execute()
     }
 
-    override fun getRecentBySymbolicCodes(
-        sourceCode: String,
-        destinationCode: String,
-    ): ExRate? {
+    override fun getRecentBySymbolicCodes(request: GetCurrencyExchangeRateRequest): ExRate? {
         val t = EX_RATE
+
+        val targetRateDate =
+            request.datetime
+                ?.let {
+                    LocalDateTime
+                        .parse(it, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT))
+                        .toLocalDate()
+                }
+
+        var condition =
+            t.DESTINATION_CURRENCY_SYMBOLIC_CODE
+                .eq(request.currency_data.destination_currency)
+                .and(t.SOURCE_CURRENCY_SYMBOLIC_CODE.eq(request.currency_data.source_currency))
+
+        if (targetRateDate != null) {
+            condition =
+                condition.and(
+                    DSL.cast(t.RATE_TIMESTAMP, SQLDataType.LOCALDATE).eq(targetRateDate)
+                )
+        }
+
         return dsl
             .selectFrom(t)
-            .where(
-                t.DESTINATION_CURRENCY_SYMBOLIC_CODE
-                    .eq(destinationCode)
-                    .and(t.SOURCE_CURRENCY_SYMBOLIC_CODE.eq(sourceCode)),
-            ).orderBy(t.RATE_TIMESTAMP.desc())
+            .where(condition)
+            .orderBy(t.RATE_TIMESTAMP.desc())
             .limit(1)
             .fetchOneInto(ExRate::class.java)
     }
