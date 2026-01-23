@@ -1,5 +1,6 @@
 package dev.vality.rateboss.service
 
+import dev.vality.exrates.service.GetCurrencyExchangeRateRequest
 import dev.vality.rateboss.converter.ExRateConverter
 import dev.vality.rateboss.dao.ExRateDao
 import dev.vality.rateboss.service.model.ExchangeRateData
@@ -34,11 +35,8 @@ class ExchangeDaoService(
         log.info("Successfully save exRate batch with size: {}", exRates.size)
     }
 
-    fun getRecentExchangeRateBySymbolicCodes(
-        sourceCode: String,
-        destinationCode: String,
-    ): ExchangeRateData? {
-        val exRate = exRateDao.getRecentBySymbolicCodes(sourceCode, destinationCode)
+    fun getRecentExchangeRateBySymbolicCodes(request: GetCurrencyExchangeRateRequest): ExchangeRateData? {
+        val exRate = exRateDao.getRecentBySymbolicCodes(request)
         return exRate?.let {
             ExchangeRateData(
                 sourceCurrencySymbolicCode = it.sourceCurrencySymbolicCode,

@@ -19,10 +19,7 @@ class ExRateServiceHandler(
     override fun getExchangeRateData(request: GetCurrencyExchangeRateRequest): GetCurrencyExchangeRateResult {
         log.info("Get getExchangeRateData request with body: {} ", request)
         val exchangeRateData =
-            exRateDaoService.getRecentExchangeRateBySymbolicCodes(
-                request.currencyData.sourceCurrency,
-                request.currencyData.destinationCurrency,
-            )
+            exRateDaoService.getRecentExchangeRateBySymbolicCodes(request)
         val result =
             exchangeRateData?.let {
                 getCurrencyExchangeRateResultConverter.convert(exchangeRateData)
