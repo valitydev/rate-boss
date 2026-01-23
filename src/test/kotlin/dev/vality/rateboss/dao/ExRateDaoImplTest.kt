@@ -1,5 +1,7 @@
 package dev.vality.rateboss.dao
 
+import dev.vality.exrates.service.CurrencyData
+import dev.vality.exrates.service.GetCurrencyExchangeRateRequest
 import dev.vality.rateboss.ContainerConfiguration
 import dev.vality.rateboss.dao.domain.Tables.EX_RATE
 import dev.vality.rateboss.dao.domain.tables.pojos.ExRate
@@ -129,8 +131,11 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             .set(dslContext.newRecord(EX_RATE, recentExRate))
             .execute()
 
-        val result =
-            exRateDao.getRecentBySymbolicCodes(sourceCurrency, destinationCurrency)
+        val request =
+            GetCurrencyExchangeRateRequest(
+                CurrencyData(sourceCurrency, destinationCurrency)
+            ).setDatetime(recentExRate.rateTimestamp.minusDays(1).toString())
+        val result = exRateDao.getRecentBySymbolicCodes(request)
 
         assertEquals(recentExRate.rationalP, result?.rationalP)
         assertEquals(recentExRate.rationalQ, result?.rationalQ)
