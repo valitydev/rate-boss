@@ -137,7 +137,10 @@ class ExRateDaoImplTest : ContainerConfiguration() {
             GetCurrencyExchangeRateRequest(
                 CurrencyData(sourceCurrency, destinationCurrency)
             ).setDatetime(
-                recentExRate.rateTimestamp.minusDays(1).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT))
+                recentExRate.rateTimestamp
+                    .toLocalDate()
+                    .atStartOfDay()
+                    .format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT))
             )
         val result = exRateDao.getRecentBySymbolicCodes(request)
 
