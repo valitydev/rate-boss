@@ -1,5 +1,8 @@
 package dev.vality.rateboss.config
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -12,6 +15,14 @@ import org.springframework.web.client.RestTemplate
 class AppConfig {
     @Bean
     fun restTemplate() = RestTemplate()
+
+    @Bean
+    fun nbkrXmlMapper(): XmlMapper =
+        XmlMapper
+            .builder()
+            .addModule(kotlinModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .build()
 
     @Bean
     fun retryTemplate(

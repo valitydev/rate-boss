@@ -3,6 +3,7 @@ package dev.vality.rateboss.config
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.job.CbrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.FixerExchangeGrabberMasterJob
+import dev.vality.rateboss.job.NbkrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbkzExchangeGrabberMasterJob
 import org.quartz.*
 import org.quartz.impl.JobDetailImpl
@@ -54,6 +55,16 @@ class JobConfig {
                 schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbkzJob.jobKey))
             }
         }
+        val nbkrJobTriggerName = ratesProperties.nbkrJob.jobTriggerName
+        if (nbkrJobTriggerName.isNotEmpty()) {
+            schedulerFactoryBean.addJob(nbkrExchangeRateGrabberMasterJob(), true, true)
+            if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.nbkrJob.jobTriggerName))) {
+                schedulerFactoryBean.scheduleJob(nbkrExchangeRateGrabberMasterTrigger())
+            }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbkrJob.jobKey))
+            }
+        }
     }
 
     fun fixerExchangeRateGrabberMasterJob(): JobDetailImpl {
@@ -99,5 +110,20 @@ class JobConfig {
             .forJob(nbkzExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.nbkzJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbkzJob.jobCron))
+            .build()
+
+    fun nbkrExchangeRateGrabberMasterJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(ratesProperties.nbkrJob.jobKey)
+        jobDetail.jobClass = NbkrExchangeGrabberMasterJob::class.java
+        return jobDetail
+    }
+
+    fun nbkrExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
+            .forJob(nbkrExchangeRateGrabberMasterJob())
+            .withIdentity(ratesProperties.nbkrJob.jobTriggerName)
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbkrJob.jobCron))
             .build()
 }

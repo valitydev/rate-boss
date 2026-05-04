@@ -10,6 +10,7 @@ data class RatesProperties(
     val fixerJob: JobDescription,
     val cbrJob: JobDescription,
     val nbkzJob: JobDescription,
+    val nbkrJob: JobDescription,
     val source: RatesSourceProperties,
 )
 
@@ -29,6 +30,7 @@ data class RatesSourceProperties(
     val fixer: FixerProperties,
     val cbr: CbrProperties,
     val nbkz: NbkzProperties,
+    val nbkr: NbkrProperties,
 )
 
 data class FixerProperties(
@@ -44,5 +46,10 @@ data class CbrProperties(
 data class NbkzProperties(
     val rootUrl: String,
     val dateFormat: String,
+    val timeZone: ZoneId,
+)
+
+data class NbkrProperties(
+    val rootUrl: String,
     val timeZone: ZoneId,
 )

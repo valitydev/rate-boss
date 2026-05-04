@@ -3,7 +3,7 @@ package dev.vality.rateboss.job
 import dev.vality.rateboss.ContainerConfiguration
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.service.ExchangeDaoService
-import dev.vality.rateboss.source.impl.NbkzExchangeRateSource
+import dev.vality.rateboss.source.impl.NbkrExchangeRateSource
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
@@ -25,17 +25,17 @@ import java.util.concurrent.TimeUnit
 
 @SpringBootTest(
     properties = [
-        "rates.nbkz-job.jobCron=0/5 * * * * ?",
-        "rates.nbkz-job.currencies.[0].symbolCode=KZT",
-        "rates.nbkz-job.currencies.[0].exponent=2",
+        "rates.nbkr-job.jobCron=0/5 * * * * ?",
+        "rates.nbkr-job.currencies.[0].symbolCode=KGS",
+        "rates.nbkr-job.currencies.[0].exponent=2",
     ],
 )
-class NbkzExchangeGrabberJobTest : ContainerConfiguration() {
+class NbkrExchangeGrabberJobTest : ContainerConfiguration() {
     @MockitoSpyBean
     lateinit var exchangeDaoService: ExchangeDaoService
 
     @MockitoBean
-    lateinit var nbkzExchangeRateSource: NbkzExchangeRateSource
+    lateinit var nbkrExchangeRateSource: NbkrExchangeRateSource
 
     @Autowired
     lateinit var scheduler: Scheduler
@@ -48,18 +48,18 @@ class NbkzExchangeGrabberJobTest : ContainerConfiguration() {
     fun setUp() {
         scheduler.unscheduleJob(TriggerKey(ratesProperties.fixerJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
-        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkrJob.jobTriggerName))
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))
     }
 
     @Test
     fun `test grabber job`() {
-        whenever(nbkzExchangeRateSource.getSourceId()).thenReturn("sourceId")
-        whenever(nbkzExchangeRateSource.getExchangeRate(any())).then {
+        whenever(nbkrExchangeRateSource.getSourceId()).thenReturn("sourceId")
+        whenever(nbkrExchangeRateSource.getExchangeRate(any())).then {
             ExchangeRates(
                 rates =
                     mapOf(
-                        "USD" to BigDecimal.valueOf(470.12),
-                        "EUR" to BigDecimal.valueOf(510.34),
+                        "USD" to BigDecimal.valueOf(87.42),
+                        "EUR" to BigDecimal.valueOf(102.10),
                     ),
                 timestamp = Instant.now().epochSecond,
             )

@@ -1,5 +1,6 @@
 package dev.vality.rateboss.config
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import dev.vality.rateboss.config.properties.*
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -10,6 +11,9 @@ import java.time.ZoneId
 class TestConfig {
     @Bean
     fun testRestTemplate() = RestTemplate()
+
+    @Bean
+    fun nbkrXmlMapper(): XmlMapper = nbkrXmlMapper()
 
     @Bean
     fun testRatesProperties(): RatesProperties =
@@ -32,10 +36,17 @@ class TestConfig {
                 "nbkz-name",
                 listOf(CurrencyProperties("KZT", 2)),
             ),
+            JobDescription(
+                "nbkr-cron",
+                "nbkr-key",
+                "nbkr-name",
+                listOf(CurrencyProperties("KGS", 2)),
+            ),
             RatesSourceProperties(
                 FixerProperties("url", "key"),
                 CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow")),
                 NbkzProperties("https://nationalbank.kz/rss/get_rates.cfm", "dd.MM.yyyy", ZoneId.of("Asia/Almaty")),
+                NbkrProperties("https://www.nbkr.kg/XML/daily.xml", ZoneId.of("Asia/Bishkek")),
             ),
         )
 }
