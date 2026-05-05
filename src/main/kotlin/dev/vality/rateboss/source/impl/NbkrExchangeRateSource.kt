@@ -38,7 +38,7 @@ class NbkrExchangeRateSource(
             } catch (e: Exception) {
                 throw ExchangeRateSourceException("Failed to parse date from NbkrApi", e)
             }
-        val nextDayTimestamp = responseDate.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC)
+        val nextDayTimestamp = responseDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC)
         log.info {
             "Exchange rates from nbkr have been retrieved, date=$responseDate, " +
                 "exchangeRates=$rates, targetTimestamp=$nextDayTimestamp"
