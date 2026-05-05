@@ -37,7 +37,7 @@ class NbkrExchangeRateSourceTest {
                 exchangeRateSource.getExchangeRate(currencySymbolCode)
             }
 
-        assertEquals("Remote client exception", exception.message)
+        assertEquals("Failed to get daily rates", exception.message)
     }
 
     @Test

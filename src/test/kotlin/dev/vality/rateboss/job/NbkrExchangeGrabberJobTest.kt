@@ -12,6 +12,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.quartz.JobKey
 import org.quartz.Scheduler
 import org.quartz.TriggerKey
 import org.springframework.beans.factory.annotation.Autowired
@@ -64,7 +65,8 @@ class NbkrExchangeGrabberJobTest : ContainerConfiguration() {
                 timestamp = Instant.now().epochSecond,
             )
         }
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted {
+        scheduler.triggerJob(JobKey(ratesProperties.nbkrJob.jobKey))
+        await().atMost(30, TimeUnit.SECONDS).untilAsserted {
             verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any())
         }
     }

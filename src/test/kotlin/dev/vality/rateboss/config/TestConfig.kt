@@ -1,6 +1,8 @@
 package dev.vality.rateboss.config
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.module.kotlin.kotlinModule
 import dev.vality.rateboss.config.properties.*
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -13,7 +15,12 @@ class TestConfig {
     fun testRestTemplate() = RestTemplate()
 
     @Bean
-    fun nbkrXmlMapper(): XmlMapper = nbkrXmlMapper()
+    fun nbkrXmlMapper(): XmlMapper =
+        XmlMapper
+            .builder()
+            .addModule(kotlinModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .build()
 
     @Bean
     fun testRatesProperties(): RatesProperties =
