@@ -97,6 +97,13 @@ rates:
     currencies:
       - symbolCode: "KZT"
         exponent: 2
+  nbkrJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'nbkr-exchange-rate-grabber-master-job'
+    jobTriggerName: 'nbkr-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "KGS"
+        exponent: 2
   source:
     fixer:
       rootUrl: https://api.apilayer.com/fixer/
@@ -108,3 +115,6 @@ rates:
       rootUrl: https://nationalbank.kz/rss/get_rates.cfm
       dateFormat: dd.MM.yyyy
       timeZone: Asia/Almaty
+    nbkr:
+      rootUrl: https://www.nbkr.kg/XML/daily.xml
+      timeZone: Asia/Bishkek
