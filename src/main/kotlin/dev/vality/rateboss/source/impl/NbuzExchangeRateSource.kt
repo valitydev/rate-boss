@@ -36,7 +36,7 @@ class NbuzExchangeRateSource(
         if (rates.isEmpty()) {
             throw ExchangeRateSourceException("Unsuccessful response from NbuzApi")
         }
-        val nextDayTimestamp = date.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC)
+        val nextDayTimestamp = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC)
         log.info { "Exchange rates from nbuz have been retrieved, date=$date, exchangeRates=$rates, targetTimestamp=$nextDayTimestamp" }
         return ExchangeRates(
             rates = rates,
