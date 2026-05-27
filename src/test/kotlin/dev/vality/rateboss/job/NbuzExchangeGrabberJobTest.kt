@@ -3,7 +3,7 @@ package dev.vality.rateboss.job
 import dev.vality.rateboss.ContainerConfiguration
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.service.ExchangeDaoService
-import dev.vality.rateboss.source.impl.NbkzExchangeRateSource
+import dev.vality.rateboss.source.impl.NbuzExchangeRateSource
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
@@ -26,17 +26,17 @@ import java.util.concurrent.TimeUnit
 
 @SpringBootTest(
     properties = [
-        "rates.nbkz-job.jobCron=0/5 * * * * ?",
-        "rates.nbkz-job.currencies.[0].symbolCode=KZT",
-        "rates.nbkz-job.currencies.[0].exponent=2",
+        "rates.nbuz-job.jobCron=0/5 * * * * ?",
+        "rates.nbuz-job.currencies.[0].symbolCode=UZS",
+        "rates.nbuz-job.currencies.[0].exponent=2",
     ],
 )
-class NbkzExchangeGrabberJobTest : ContainerConfiguration() {
+class NbuzExchangeGrabberJobTest : ContainerConfiguration() {
     @MockitoSpyBean
     lateinit var exchangeDaoService: ExchangeDaoService
 
     @MockitoBean
-    lateinit var nbkzExchangeRateSource: NbkzExchangeRateSource
+    lateinit var nbuzExchangeRateSource: NbuzExchangeRateSource
 
     @Autowired
     lateinit var scheduler: Scheduler
@@ -49,24 +49,24 @@ class NbkzExchangeGrabberJobTest : ContainerConfiguration() {
     fun setUp() {
         scheduler.unscheduleJob(TriggerKey(ratesProperties.fixerJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkrJob.jobTriggerName))
-        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbuzJob.jobTriggerName))
     }
 
     @Test
     fun `test grabber job`() {
-        whenever(nbkzExchangeRateSource.getSourceId()).thenReturn("sourceId")
-        whenever(nbkzExchangeRateSource.getExchangeRate(any())).then {
+        whenever(nbuzExchangeRateSource.getSourceId()).thenReturn("sourceId")
+        whenever(nbuzExchangeRateSource.getExchangeRate(any())).then {
             ExchangeRates(
                 rates =
                     mapOf(
-                        "USD" to BigDecimal.valueOf(470.12),
-                        "EUR" to BigDecimal.valueOf(510.34),
+                        "USD" to BigDecimal.valueOf(11979.64),
+                        "EUR" to BigDecimal.valueOf(13901.17),
                     ),
                 timestamp = Instant.now().epochSecond,
             )
         }
-        scheduler.triggerJob(JobKey(ratesProperties.nbkzJob.jobKey))
+        scheduler.triggerJob(JobKey(ratesProperties.nbuzJob.jobKey))
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {
             verify(exchangeDaoService, atLeastOnce()).saveExchangeRates(any())
         }
