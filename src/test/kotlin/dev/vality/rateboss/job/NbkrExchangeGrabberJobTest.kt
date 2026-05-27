@@ -50,6 +50,7 @@ class NbkrExchangeGrabberJobTest : ContainerConfiguration() {
         scheduler.unscheduleJob(TriggerKey(ratesProperties.fixerJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbuzJob.jobTriggerName))
     }
 
     @Test

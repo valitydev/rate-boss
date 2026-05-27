@@ -59,6 +59,9 @@ class FixerExchangeGrabberJobTest : ContainerConfiguration() {
     @BeforeEach
     fun setUp() {
         scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkrJob.jobTriggerName))
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbuzJob.jobTriggerName))
     }
 
     @Test

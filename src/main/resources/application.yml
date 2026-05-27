@@ -104,6 +104,13 @@ rates:
     currencies:
       - symbolCode: "KGS"
         exponent: 2
+  nbuzJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'nbuz-exchange-rate-grabber-master-job'
+    jobTriggerName: 'nbuz-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "UZS"
+        exponent: 2
   source:
     fixer:
       rootUrl: https://api.apilayer.com/fixer/
@@ -118,3 +125,7 @@ rates:
     nbkr:
       rootUrl: https://www.nbkr.kg/XML/daily.xml
       timeZone: Asia/Bishkek
+    nbuz:
+      rootUrl: https://nbu.uz/api/collections/individuals_exchange_rates/entries
+      locale: ru
+      timeZone: Asia/Tashkent

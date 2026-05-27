@@ -5,6 +5,7 @@ import dev.vality.rateboss.job.CbrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.FixerExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbkrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbkzExchangeGrabberMasterJob
+import dev.vality.rateboss.job.NbuzExchangeGrabberMasterJob
 import org.quartz.*
 import org.quartz.impl.JobDetailImpl
 import org.springframework.beans.factory.annotation.Autowired
@@ -63,6 +64,16 @@ class JobConfig {
             }
             if (runOnStartup) {
                 schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbkrJob.jobKey))
+            }
+        }
+        val nbuzJobTriggerName = ratesProperties.nbuzJob.jobTriggerName
+        if (nbuzJobTriggerName.isNotEmpty()) {
+            schedulerFactoryBean.addJob(nbuzExchangeRateGrabberMasterJob(), true, true)
+            if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.nbuzJob.jobTriggerName))) {
+                schedulerFactoryBean.scheduleJob(nbuzExchangeRateGrabberMasterTrigger())
+            }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbuzJob.jobKey))
             }
         }
     }
@@ -125,5 +136,20 @@ class JobConfig {
             .forJob(nbkrExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.nbkrJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbkrJob.jobCron))
+            .build()
+
+    fun nbuzExchangeRateGrabberMasterJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(ratesProperties.nbuzJob.jobKey)
+        jobDetail.jobClass = NbuzExchangeGrabberMasterJob::class.java
+        return jobDetail
+    }
+
+    fun nbuzExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
+            .forJob(nbuzExchangeRateGrabberMasterJob())
+            .withIdentity(ratesProperties.nbuzJob.jobTriggerName)
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbuzJob.jobCron))
             .build()
 }
