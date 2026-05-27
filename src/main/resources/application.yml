@@ -126,6 +126,6 @@ rates:
       rootUrl: https://www.nbkr.kg/XML/daily.xml
       timeZone: Asia/Bishkek
     nbuz:
-      rootUrl: https://nbu.uz/api/collections/individuals_exchange_rates_bankomats/entries
+      rootUrl: https://nbu.uz/api/collections/individuals_exchange_rates/entries
       locale: ru
       timeZone: Asia/Tashkent
