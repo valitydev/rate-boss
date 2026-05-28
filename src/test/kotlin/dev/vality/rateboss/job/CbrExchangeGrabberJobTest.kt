@@ -52,6 +52,7 @@ class CbrExchangeGrabberJobTest : ContainerConfiguration() {
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkrJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbuzJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.biJob.jobTriggerName))
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbazJob.jobTriggerName))
     }
 
     @Test
