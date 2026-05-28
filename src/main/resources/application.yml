@@ -90,6 +90,13 @@ rates:
     currencies:
       - symbolCode: "RUB"
         exponent: 2
+  biJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'bi-exchange-rate-grabber-master-job'
+    jobTriggerName: 'bi-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "IDR"
+        exponent: 2
   nbkzJob:
     jobCron: '0 0 0/1 * * ?'
     jobKey: 'nbkz-exchange-rate-grabber-master-job'
@@ -125,6 +132,11 @@ rates:
     cbr:
       rootUrl: https://www.cbr.ru/scripts/XML_daily.asp
       timeZone: Europe/Moscow
+    bi:
+      rootUrl: https://www.bi.go.id/biwebservice/wskursbi.asmx/getSubKursLokal3
+      timeZone: Asia/Jakarta
+      lookbackDays: 7
+      targetCurrencies: [ "USD", "EUR" ]
     nbkz:
       rootUrl: https://nationalbank.kz/rss/get_rates.cfm
       dateFormat: dd.MM.yyyy
