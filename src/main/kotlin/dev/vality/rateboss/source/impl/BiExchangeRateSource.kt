@@ -15,6 +15,7 @@ import java.math.BigDecimal
 import java.math.MathContext
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -83,6 +84,7 @@ class BiExchangeRateSource(
                 .parse(ByteArrayInputStream(xmlContent.toByteArray(StandardCharsets.UTF_8)))
 
         val tables = document.getElementsByTagName("Table")
+        var lastTimestamp: OffsetDateTime? = null
         var idrPerTargetCurrency: BigDecimal? = null
 
         for (i in 0 until tables.length) {
@@ -91,13 +93,19 @@ class BiExchangeRateSource(
                 continue
             }
             val table = tableNode as Element
-            val parsedValue =
-                extractDecimalByTags(
-                    table,
-                    listOf("kurs_tengah", "kursjual", "kurs_jual", "kursbeli", "kurs_beli"),
-                )
-            if (parsedValue != null && parsedValue.compareTo(BigDecimal.ZERO) > 0) {
-                idrPerTargetCurrency = parsedValue
+            val parsedDate =
+                extractTextByTag(table, "tgl_subkurslokal")
+                    ?.let { OffsetDateTime.parse(it.trim()) }
+                    ?: continue
+            val nominal = extractDecimalByTag(table, "nil_subkurslokal")
+            val sell = extractDecimalByTag(table, "jual_subkurslokal")
+            if (nominal == null || nominal <= BigDecimal.ZERO || sell == null || sell <= BigDecimal.ZERO) {
+                continue
+            }
+            val normalizedSell = sell.divide(nominal, MathContext.DECIMAL64)
+            if (lastTimestamp == null || parsedDate.isAfter(lastTimestamp)) {
+                lastTimestamp = parsedDate
+                idrPerTargetCurrency = normalizedSell
             }
         }
 
@@ -106,24 +114,18 @@ class BiExchangeRateSource(
         return BigDecimal.ONE.divide(rate, MathContext.DECIMAL64)
     }
 
-    private fun extractDecimalByTags(
+    private fun extractDecimalByTag(
         parent: Element,
-        tags: List<String>,
-    ): BigDecimal? {
-        for (tag in tags) {
-            val value =
-                parent
-                    .getElementsByTagName(tag)
-                    .item(0)
-                    ?.textContent
-                    ?.normalizeDecimal()
-                    ?.toBigDecimalOrNull()
-            if (value != null) {
-                return value
-            }
-        }
-        return null
-    }
+        tag: String,
+    ): BigDecimal? =
+        extractTextByTag(parent, tag)
+            ?.normalizeDecimal()
+            ?.toBigDecimalOrNull()
+
+    private fun extractTextByTag(
+        parent: Element,
+        tag: String,
+    ): String? = parent.getElementsByTagName(tag).item(0)?.textContent
 
     private fun String?.normalizeDecimal(): String =
         this

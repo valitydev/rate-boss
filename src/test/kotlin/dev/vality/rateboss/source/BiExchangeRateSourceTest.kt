@@ -59,11 +59,18 @@ class BiExchangeRateSourceTest {
         val currencySymbolCode = "IDR"
         whenever(biApiClient.getExchangeRates(any(), any(), any())).thenReturn(
             """
-            <NewDataSet>
-              <Table>
-                <kurs_tengah>16400,00</kurs_tengah>
-              </Table>
-            </NewDataSet>
+            <DataSet xmlns="http://tempuri.org/">
+              <diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+                <NewDataSet xmlns="">
+                  <Table>
+                    <nil_subkurslokal>1.00</nil_subkurslokal>
+                    <beli_subkurslokal>17654.28</beli_subkurslokal>
+                    <jual_subkurslokal>17831.72</jual_subkurslokal>
+                    <tgl_subkurslokal>2026-05-26T00:00:00+07:00</tgl_subkurslokal>
+                  </Table>
+                </NewDataSet>
+              </diffgr:diffgram>
+            </DataSet>
             """.trimIndent(),
         )
 
@@ -72,7 +79,7 @@ class BiExchangeRateSourceTest {
         assertNotNull(exchangeRate)
         assertTrue(exchangeRate.rates.isNotEmpty())
         assertTrue(exchangeRate.rates.containsKey("USD"))
-        assertEquals(BigDecimal("0.00006097560975609756"), exchangeRate.rates["USD"])
+        assertEquals(BigDecimal("0.00005607983974624994"), exchangeRate.rates["USD"])
     }
 
     @Test
@@ -80,19 +87,29 @@ class BiExchangeRateSourceTest {
         val currencySymbolCode = "IDR"
         whenever(biApiClient.getExchangeRates(any(), any(), any())).thenReturn(
             """
-            <NewDataSet>
-              <Table>
-                <kurs_tengah></kurs_tengah>
-              </Table>
-              <Table>
-                <kurs_tengah>16300,00</kurs_tengah>
-              </Table>
-            </NewDataSet>
+            <DataSet xmlns="http://tempuri.org/">
+              <diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+                <NewDataSet xmlns="">
+                  <Table>
+                    <nil_subkurslokal>1.00</nil_subkurslokal>
+                    <beli_subkurslokal></beli_subkurslokal>
+                    <jual_subkurslokal></jual_subkurslokal>
+                    <tgl_subkurslokal>2026-05-27T00:00:00+07:00</tgl_subkurslokal>
+                  </Table>
+                  <Table>
+                    <nil_subkurslokal>1.00</nil_subkurslokal>
+                    <beli_subkurslokal>17654.28</beli_subkurslokal>
+                    <jual_subkurslokal>17831.72</jual_subkurslokal>
+                    <tgl_subkurslokal>2026-05-26T00:00:00+07:00</tgl_subkurslokal>
+                  </Table>
+                </NewDataSet>
+              </diffgr:diffgram>
+            </DataSet>
             """.trimIndent(),
         )
 
         val exchangeRate = exchangeRateSource.getExchangeRate(currencySymbolCode)
 
-        assertEquals(BigDecimal("0.00006134969325153374"), exchangeRate.rates["USD"])
+        assertEquals(BigDecimal("0.00005607983974624994"), exchangeRate.rates["USD"])
     }
 }
