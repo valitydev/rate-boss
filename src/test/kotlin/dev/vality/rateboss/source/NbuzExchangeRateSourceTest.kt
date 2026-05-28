@@ -2,6 +2,9 @@ package dev.vality.rateboss.source
 
 import dev.vality.rateboss.client.nbuz.NbuzApiClient
 import dev.vality.rateboss.config.TestConfig
+import dev.vality.rateboss.model.NbuzRateItem
+import dev.vality.rateboss.model.NbuzRatesEntry
+import dev.vality.rateboss.model.NbuzRatesResponse
 import dev.vality.rateboss.source.impl.NbuzExchangeRateSource
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -38,13 +41,13 @@ class NbuzExchangeRateSourceTest {
                 exchangeRateSource.getExchangeRate(currencySymbolCode)
             }
 
-        assertEquals("Failed to get daily rates", exception.message)
+        assertEquals("Failed to get daily rates from nbuz", exception.message)
     }
 
     @Test
     fun getEmptyExchangeRate() {
         val currencySymbolCode = "UZS"
-        whenever(nbuzApiClient.getExchangeRates(any())).thenReturn("""{"data": []}""")
+        whenever(nbuzApiClient.getExchangeRates(any())).thenReturn(NbuzRatesResponse(data = emptyList()))
 
         val exception =
             org.junit.jupiter.api.assertThrows<ExchangeRateSourceException> {
@@ -58,26 +61,26 @@ class NbuzExchangeRateSourceTest {
     fun getSuccessExchangeRate() {
         val currencySymbolCode = "UZS"
         whenever(nbuzApiClient.getExchangeRates(any())).thenReturn(
-            """
-            {
-              "data": [
-                {
-                  "rates": [
-                    {
-                      "rate_code": "USD",
-                      "rate_sb": "11979,64",
-                      "rate_equivalent": "1"
-                    },
-                    {
-                      "rate_code": "JPY",
-                      "rate_sb": "150,58",
-                      "rate_equivalent": "2"
-                    }
-                  ]
-                }
-              ]
-            }
-            """.trimIndent(),
+            NbuzRatesResponse(
+                data =
+                    listOf(
+                        NbuzRatesEntry(
+                            rates =
+                                listOf(
+                                    NbuzRateItem(
+                                        rateCode = "USD",
+                                        rateSb = "11979,64",
+                                        rateEquivalent = "1",
+                                    ),
+                                    NbuzRateItem(
+                                        rateCode = "JPY",
+                                        rateSb = "150,58",
+                                        rateEquivalent = "2",
+                                    ),
+                                ),
+                        ),
+                    ),
+            ),
         )
 
         val exchangeRate = exchangeRateSource.getExchangeRate(currencySymbolCode)
@@ -92,26 +95,26 @@ class NbuzExchangeRateSourceTest {
     fun getSuccessExchangeRateWithMalformedCurrencyRecord() {
         val currencySymbolCode = "UZS"
         whenever(nbuzApiClient.getExchangeRates(any())).thenReturn(
-            """
-            {
-              "data": [
-                {
-                  "rates": [
-                    {
-                      "rate_code": "USD",
-                      "rate_sb": "11979,64",
-                      "rate_equivalent": "1"
-                    },
-                    {
-                      "rate_code": "BROKEN",
-                      "rate_sb": "100",
-                      "rate_equivalent": "0"
-                    }
-                  ]
-                }
-              ]
-            }
-            """.trimIndent(),
+            NbuzRatesResponse(
+                data =
+                    listOf(
+                        NbuzRatesEntry(
+                            rates =
+                                listOf(
+                                    NbuzRateItem(
+                                        rateCode = "USD",
+                                        rateSb = "11979,64",
+                                        rateEquivalent = "1",
+                                    ),
+                                    NbuzRateItem(
+                                        rateCode = "BROKEN",
+                                        rateSb = "100",
+                                        rateEquivalent = "0",
+                                    ),
+                                ),
+                        ),
+                    ),
+            ),
         )
 
         val exchangeRate = exchangeRateSource.getExchangeRate(currencySymbolCode)

@@ -1,6 +1,7 @@
 package dev.vality.rateboss.client.nbuz
 
 import dev.vality.rateboss.config.properties.RatesProperties
+import dev.vality.rateboss.model.NbuzRatesResponse
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
@@ -14,9 +15,9 @@ class NbuzApiClient(
     private val restTemplate: RestTemplate,
     private val ratesProperties: RatesProperties,
 ) {
-    fun getExchangeRates(date: LocalDate): String {
+    fun getExchangeRates(date: LocalDate): NbuzRatesResponse {
         val url = buildUrl(date)
-        return restTemplate.exchange<String>(url, HttpMethod.GET, HttpEntity.EMPTY).body!!
+        return restTemplate.exchange<NbuzRatesResponse>(url, HttpMethod.GET, HttpEntity.EMPTY).body!!
     }
 
     private fun buildUrl(date: LocalDate): String =
