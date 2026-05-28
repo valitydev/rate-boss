@@ -3,6 +3,7 @@ package dev.vality.rateboss.config
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.job.CbrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.FixerExchangeGrabberMasterJob
+import dev.vality.rateboss.job.NbazExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbkrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbkzExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbuzExchangeGrabberMasterJob
@@ -74,6 +75,16 @@ class JobConfig {
             }
             if (runOnStartup) {
                 schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbuzJob.jobKey))
+            }
+        }
+        val nbazJobTriggerName = ratesProperties.nbazJob.jobTriggerName
+        if (nbazJobTriggerName.isNotEmpty()) {
+            schedulerFactoryBean.addJob(nbazExchangeRateGrabberMasterJob(), true, true)
+            if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.nbazJob.jobTriggerName))) {
+                schedulerFactoryBean.scheduleJob(nbazExchangeRateGrabberMasterTrigger())
+            }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbazJob.jobKey))
             }
         }
     }
@@ -151,5 +162,20 @@ class JobConfig {
             .forJob(nbuzExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.nbuzJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbuzJob.jobCron))
+            .build()
+
+    fun nbazExchangeRateGrabberMasterJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(ratesProperties.nbazJob.jobKey)
+        jobDetail.jobClass = NbazExchangeGrabberMasterJob::class.java
+        return jobDetail
+    }
+
+    fun nbazExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
+            .forJob(nbazExchangeRateGrabberMasterJob())
+            .withIdentity(ratesProperties.nbazJob.jobTriggerName)
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbazJob.jobCron))
             .build()
 }

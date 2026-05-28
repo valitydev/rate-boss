@@ -111,6 +111,13 @@ rates:
     currencies:
       - symbolCode: "UZS"
         exponent: 2
+  nbazJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'nbaz-exchange-rate-grabber-master-job'
+    jobTriggerName: 'nbaz-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "AZN"
+        exponent: 2
   source:
     fixer:
       rootUrl: https://api.apilayer.com/fixer/
@@ -129,3 +136,7 @@ rates:
       rootUrl: https://nbu.uz/api/collections/individuals_exchange_rates/entries
       locale: ru
       timeZone: Asia/Tashkent
+    nbaz:
+      rootUrl: https://www.cbar.az/currencies/
+      dateFormat: dd.MM.yyyy
+      timeZone: Asia/Baku
