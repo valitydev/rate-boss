@@ -27,3 +27,8 @@ For each configured source:
 - `ExchangeGrabberMasterJob` reads the list of base currencies from `rates.*Job.currencies`.
 - It spawns `ExchangeGrabberJob` per currency.
 - Each `ExchangeGrabberJob` calls the respective `ExchangeRateSource`, saves the rates, and (for some sources) emits Kafka events.
+
+## BI source notes
+
+- Source: Bank Indonesia
+- Stored BI rate format: `target currency per 1000 IDR` (e.g. `USD per 1000 IDR`), i.e. `1000 / (jual_subkurslokal / nil_subkurslokal)`.

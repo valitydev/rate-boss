@@ -79,7 +79,7 @@ class BiExchangeRateSourceTest {
         assertNotNull(exchangeRate)
         assertTrue(exchangeRate.rates.isNotEmpty())
         assertTrue(exchangeRate.rates.containsKey("USD"))
-        assertEquals(BigDecimal("0.00005607983974624994"), exchangeRate.rates["USD"])
+        assertEquals(BigDecimal("0.05607983974624994"), exchangeRate.rates["USD"])
     }
 
     @Test
@@ -110,6 +110,6 @@ class BiExchangeRateSourceTest {
 
         val exchangeRate = exchangeRateSource.getExchangeRate(currencySymbolCode)
 
-        assertEquals(BigDecimal("0.00005607983974624994"), exchangeRate.rates["USD"])
+        assertEquals(BigDecimal("0.05607983974624994"), exchangeRate.rates["USD"])
     }
 }

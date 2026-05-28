@@ -111,7 +111,8 @@ class BiExchangeRateSource(
 
         val rate = idrPerTargetCurrency ?: return null
         log.debug { "BI rate parsed for targetCurrency=$targetCurrency: idrPerTargetCurrency=$rate" }
-        return BigDecimal.ONE.divide(rate, MathContext.DECIMAL64)
+        // Use 1000 here instead of 1.
+        return BI_RATE_MULTIPLIER.divide(rate, MathContext.DECIMAL64)
     }
 
     private fun extractDecimalByTag(
@@ -133,4 +134,8 @@ class BiExchangeRateSource(
             ?.replace(",", ".")
             ?.trim()
             .orEmpty()
+
+    companion object {
+        private val BI_RATE_MULTIPLIER: BigDecimal = BigDecimal.valueOf(1000L)
+    }
 }
