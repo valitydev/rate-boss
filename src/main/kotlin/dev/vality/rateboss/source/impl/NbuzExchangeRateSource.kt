@@ -1,6 +1,5 @@
 package dev.vality.rateboss.source.impl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import dev.vality.rateboss.client.nbuz.NbuzApiClient
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.job.constant.ExRateSources
@@ -20,7 +19,6 @@ private val log = KotlinLogging.logger {}
 class NbuzExchangeRateSource(
     private val nbuzApiClient: NbuzApiClient,
     private val ratesProperties: RatesProperties,
-    private val objectMapper: ObjectMapper,
 ) : ExchangeRateSource {
     override fun getExchangeRate(currencySymbolCode: String): ExchangeRates {
         val timeZone = ratesProperties.source.nbuz.timeZone
@@ -28,9 +26,9 @@ class NbuzExchangeRateSource(
         log.info { "Trying to get exchange rates from nbuz for currency=$currencySymbolCode, date=$date" }
         val response =
             try {
-                objectMapper.readValue(nbuzApiClient.getExchangeRates(date), NbuzRatesResponse::class.java)
+                nbuzApiClient.getExchangeRates(date)
             } catch (e: Exception) {
-                throw ExchangeRateSourceException("Failed to get daily rates", e)
+                throw ExchangeRateSourceException("Failed to get daily rates from nbuz", e)
             }
         val rates = buildRatesMap(response)
         if (rates.isEmpty()) {

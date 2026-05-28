@@ -30,7 +30,7 @@ class NbuzApiClientTest {
         val response = nbuzApiClient.getExchangeRates(LocalDate.now())
 
         assertNotNull(response)
-        assertTrue(response.isNotBlank())
+        assertNotNull(response.data)
     }
 
     @Test
