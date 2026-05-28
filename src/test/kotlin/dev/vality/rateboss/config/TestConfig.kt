@@ -59,6 +59,12 @@ class TestConfig {
                 "nbuz-name",
                 listOf(CurrencyProperties("UZS", 2)),
             ),
+            JobDescription(
+                "nbaz-cron",
+                "nbaz-key",
+                "nbaz-name",
+                listOf(CurrencyProperties("AZN", 2)),
+            ),
             RatesSourceProperties(
                 FixerProperties("url", "key"),
                 CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow")),
@@ -68,6 +74,11 @@ class TestConfig {
                     "https://nbu.uz/api/collections/individuals_exchange_rates_bankomats/entries",
                     "ru",
                     ZoneId.of("Asia/Tashkent"),
+                ),
+                NbazProperties(
+                    "https://www.cbar.az/currencies/",
+                    "dd.MM.yyyy",
+                    ZoneId.of("Asia/Baku"),
                 ),
             ),
         )
