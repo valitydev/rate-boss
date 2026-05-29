@@ -42,6 +42,12 @@ class TestConfig {
                 listOf(CurrencyProperties("RUB", 2)),
             ),
             JobDescription(
+                "bi-cron",
+                "bi-key",
+                "bi-name",
+                listOf(CurrencyProperties("IDR", 2)),
+            ),
+            JobDescription(
                 "nbkz-cron",
                 "nbkz-key",
                 "nbkz-name",
@@ -68,6 +74,12 @@ class TestConfig {
             RatesSourceProperties(
                 FixerProperties("url", "key"),
                 CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow")),
+                BiProperties(
+                    "https://www.bi.go.id/biwebservice/wskursbi.asmx/getSubKursLokal3",
+                    ZoneId.of("Asia/Jakarta"),
+                    7,
+                    listOf("USD", "EUR"),
+                ),
                 NbkzProperties("https://nationalbank.kz/rss/get_rates.cfm", "dd.MM.yyyy", ZoneId.of("Asia/Almaty")),
                 NbkrProperties("https://www.nbkr.kg/XML/daily.xml", ZoneId.of("Asia/Bishkek")),
                 NbuzProperties(

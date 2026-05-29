@@ -1,6 +1,7 @@
 package dev.vality.rateboss.config
 
 import dev.vality.rateboss.config.properties.RatesProperties
+import dev.vality.rateboss.job.BiExchangeGrabberMasterJob
 import dev.vality.rateboss.job.CbrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.FixerExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbazExchangeGrabberMasterJob
@@ -45,6 +46,16 @@ class JobConfig {
             }
             if (runOnStartup) {
                 schedulerFactoryBean.triggerJob(JobKey(ratesProperties.cbrJob.jobKey))
+            }
+        }
+        val biJobTriggerName = ratesProperties.biJob.jobTriggerName
+        if (biJobTriggerName.isNotEmpty()) {
+            schedulerFactoryBean.addJob(biExchangeRateGrabberMasterJob(), true, true)
+            if (!schedulerFactoryBean.checkExists(TriggerKey(ratesProperties.biJob.jobTriggerName))) {
+                schedulerFactoryBean.scheduleJob(biExchangeRateGrabberMasterTrigger())
+            }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.biJob.jobKey))
             }
         }
         val nbkzJobTriggerName = ratesProperties.nbkzJob.jobTriggerName
@@ -117,6 +128,21 @@ class JobConfig {
             .forJob(cbrExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.cbrJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.cbrJob.jobCron))
+            .build()
+
+    fun biExchangeRateGrabberMasterJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(ratesProperties.biJob.jobKey)
+        jobDetail.jobClass = BiExchangeGrabberMasterJob::class.java
+        return jobDetail
+    }
+
+    fun biExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
+            .forJob(biExchangeRateGrabberMasterJob())
+            .withIdentity(ratesProperties.biJob.jobTriggerName)
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.biJob.jobCron))
             .build()
 
     fun nbkzExchangeRateGrabberMasterJob(): JobDetailImpl {
