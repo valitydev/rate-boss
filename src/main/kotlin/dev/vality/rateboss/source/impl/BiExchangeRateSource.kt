@@ -62,12 +62,12 @@ class BiExchangeRateSource(
             throw ExchangeRateSourceException("Unsuccessful response from BiApi for period $startDate..$date")
         }
 
-        val nextDayTimestamp = date.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC)
-        log.info { "Exchange rates from bi have been retrieved, date=$date, exchangeRates=$rates, targetTimestamp=$nextDayTimestamp" }
+        val dayTimestamp = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC)
+        log.info { "Exchange rates from bi have been retrieved, date=$date, exchangeRates=$rates, targetTimestamp=$dayTimestamp" }
 
         return ExchangeRates(
             rates = rates,
-            timestamp = nextDayTimestamp,
+            timestamp = dayTimestamp,
         )
     }
 
