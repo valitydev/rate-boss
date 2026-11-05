@@ -4,6 +4,7 @@ import dev.vality.exrates.base.Rational
 import dev.vality.exrates.service.*
 import dev.vality.rateboss.converter.GetCurrencyExchangeRateResultConverter
 import dev.vality.rateboss.converter.TimestampExchangeRateRequestConverter
+import dev.vality.rateboss.extensions.toRational
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -38,7 +39,8 @@ class ExRateServiceHandler(
         val result =
             exRateByTimestamp?.let {
                 val convertedAmount = conversionService.convertAmount(conversionRequest.amount, exRateByTimestamp)
-                Rational(convertedAmount.numeratorAsLong, convertedAmount.denominatorAsLong)
+                val rational = convertedAmount.toRational()
+                Rational(rational.numerator, rational.denominator)
             } ?: throw ExRateNotFound()
         log.info("Result getConvertedAmount with body: {} ", result)
         return result

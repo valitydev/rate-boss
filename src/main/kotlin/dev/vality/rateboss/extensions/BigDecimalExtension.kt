@@ -1,5 +1,6 @@
 package dev.vality.rateboss.extensions
 
+import org.apache.commons.math3.fraction.BigFraction
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -26,3 +27,20 @@ data class Rational(
     val numerator: Long,
     val denominator: Long,
 )
+
+fun BigDecimal.toBigFraction(): BigFraction {
+    val normalized = stripTrailingZeros()
+    val scale = normalized.scale()
+    return if (scale >= 0) {
+        BigFraction(normalized.unscaledValue(), BigInteger.TEN.pow(scale))
+    } else {
+        BigFraction(normalized.unscaledValue().multiply(BigInteger.TEN.pow(-scale)), BigInteger.ONE)
+    }
+}
+
+fun BigFraction.toRational(): Rational =
+    try {
+        Rational(numerator.longValueExact(), denominator.longValueExact())
+    } catch (e: ArithmeticException) {
+        throw ArithmeticException("Rational value does not fit in signed 64-bit integers: $this").apply { initCause(e) }
+    }

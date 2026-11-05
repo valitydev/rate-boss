@@ -1,9 +1,8 @@
 package dev.vality.rateboss.converter
 
 import dev.vality.rateboss.dao.domain.tables.pojos.ExRate
-import dev.vality.rateboss.extensions.toRational
+import dev.vality.rateboss.source.model.RateValue
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -16,7 +15,7 @@ class ExRateConverter {
     fun convert(
         baseCurrencySymbolCode: String,
         baseCurrencyExponent: Short,
-        exchangeRateMapEntry: Map.Entry<String, BigDecimal>,
+        exchangeRateMapEntry: Map.Entry<String, RateValue>,
         exchangeRateTimestamp: Long,
         sourceId: String,
     ): ExRate {

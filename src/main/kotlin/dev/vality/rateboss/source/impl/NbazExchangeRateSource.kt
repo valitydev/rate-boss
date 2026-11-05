@@ -37,7 +37,7 @@ class NbazExchangeRateSource(
             "Exchange rates from nbaz have been retrieved, date=$date, " +
                 "exchangeRates=$rates, targetTimestamp=$dayTimestamp"
         }
-        return ExchangeRates(
+        return ExchangeRates.fromDecimals(
             rates = rates,
             timestamp = dayTimestamp,
         )

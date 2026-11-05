@@ -76,6 +76,9 @@ retryTemplate:
   maxAttempts: 5
 
 rates:
+  http:
+    connectTimeout: 5s
+    readTimeout: 15s
   fixerJob:
     jobCron: '0 0 0/1 * * ?'
     jobKey: 'fixer-exchange-rate-grabber-master-job'
@@ -125,6 +128,13 @@ rates:
     currencies:
       - symbolCode: "AZN"
         exponent: 2
+  nbpJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'nbp-exchange-rate-grabber-master-job'
+    jobTriggerName: 'nbp-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "PLN"
+        exponent: 2
   source:
     fixer:
       rootUrl: https://api.apilayer.com/fixer/
@@ -152,3 +162,6 @@ rates:
       rootUrl: https://www.cbar.az/currencies/
       dateFormat: dd.MM.yyyy
       timeZone: Asia/Baku
+    nbp:
+      rootUrl: https://api.nbp.pl/api/exchangerates/rates/A/EUR/
+      timeZone: Europe/Warsaw

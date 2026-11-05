@@ -3,6 +3,7 @@ package dev.vality.rateboss.source
 import dev.vality.rateboss.client.nbkr.NbkrApiClient
 import dev.vality.rateboss.config.TestConfig
 import dev.vality.rateboss.source.impl.NbkrExchangeRateSource
+import dev.vality.rateboss.source.model.RateValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -83,8 +84,8 @@ class NbkrExchangeRateSourceTest {
         assertNotNull(exchangeRate)
         assertTrue(exchangeRate.rates.isNotEmpty())
         assertTrue(exchangeRate.rates.containsKey("USD"))
-        assertEquals(BigDecimal("87.4205"), exchangeRate.rates["USD"])
-        assertEquals(BigDecimal("102.1028"), exchangeRate.rates["EUR"])
+        assertEquals(RateValue.Decimal(BigDecimal("87.4205")), exchangeRate.rates["USD"])
+        assertEquals(RateValue.Decimal(BigDecimal("102.1028")), exchangeRate.rates["EUR"])
     }
 
     @Test
@@ -108,7 +109,7 @@ class NbkrExchangeRateSourceTest {
 
         val exchangeRate = exchangeRateSource.getExchangeRate(currencySymbolCode)
 
-        assertEquals(BigDecimal("87.4205"), exchangeRate.rates["USD"])
+        assertEquals(RateValue.Decimal(BigDecimal("87.4205")), exchangeRate.rates["USD"])
         assertTrue(!exchangeRate.rates.containsKey("BROKEN"))
     }
 }

@@ -2,6 +2,7 @@ package dev.vality.rateboss.config.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.validation.annotation.Validated
+import java.time.Duration
 import java.time.ZoneId
 
 @Validated
@@ -14,7 +15,9 @@ data class RatesProperties(
     val nbkrJob: JobDescription,
     val nbuzJob: JobDescription,
     val nbazJob: JobDescription,
+    val nbpJob: JobDescription,
     val source: RatesSourceProperties,
+    val http: HttpProperties = HttpProperties(),
 )
 
 data class JobDescription(
@@ -37,6 +40,7 @@ data class RatesSourceProperties(
     val nbkr: NbkrProperties,
     val nbuz: NbuzProperties,
     val nbaz: NbazProperties,
+    val nbp: NbpProperties,
 )
 
 data class FixerProperties(
@@ -78,3 +82,19 @@ data class NbazProperties(
     val dateFormat: String,
     val timeZone: ZoneId,
 )
+
+data class NbpProperties(
+    val rootUrl: String,
+    val timeZone: ZoneId = ZoneId.of("Europe/Warsaw"),
+)
+
+data class HttpProperties(
+    val connectTimeout: Duration = Duration.ofSeconds(5),
+    val readTimeout: Duration = Duration.ofSeconds(15),
+) {
+    init {
+        val allowedTimeouts = Duration.ofMillis(1)..Duration.ofMillis(Int.MAX_VALUE.toLong())
+        require(connectTimeout in allowedTimeouts) { "HTTP connectTimeout must be between 1ms and ${Int.MAX_VALUE}ms" }
+        require(readTimeout in allowedTimeouts) { "HTTP readTimeout must be between 1ms and ${Int.MAX_VALUE}ms" }
+    }
+}

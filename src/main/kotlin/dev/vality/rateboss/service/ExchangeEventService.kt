@@ -6,18 +6,18 @@ import dev.vality.exrates.events.CurrencyEvent
 import dev.vality.exrates.events.CurrencyEventPayload
 import dev.vality.exrates.events.CurrencyExchangeRate
 import dev.vality.geck.common.util.TypeUtil
-import dev.vality.rateboss.extensions.toRational
 import dev.vality.rateboss.source.model.ExchangeRates
+import dev.vality.rateboss.source.model.RateValue
 import mu.KotlinLogging
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
+import javax.money.Monetary
 
 private val log = KotlinLogging.logger {}
 
@@ -72,7 +72,7 @@ class ExchangeEventService(
     private fun buildCurrencyExchangeRatePayload(
         baseCurrencySymbolCode: String,
         baseCurrencyExponent: Short,
-        exchangeRateMap: Map.Entry<String, BigDecimal>,
+        exchangeRateMap: Map.Entry<String, RateValue>,
         exchangeRateTimestamp: Long,
     ): CurrencyEventPayload? =
         CurrencyEventPayload.exchange_rate(
@@ -85,7 +85,10 @@ class ExchangeEventService(
                 ).setDestinationCurrency(
                     Currency(
                         exchangeRateMap.key,
-                        exchangeRateMap.value.scale().toShort(),
+                        when (val rate = exchangeRateMap.value) {
+                            is RateValue.Decimal -> rate.value.scale().toShort()
+                            is RateValue.Fraction -> Monetary.getCurrency(exchangeRateMap.key).defaultFractionDigits.toShort()
+                        },
                     ),
                 ).setExchangeRate(
                     Rational().apply {

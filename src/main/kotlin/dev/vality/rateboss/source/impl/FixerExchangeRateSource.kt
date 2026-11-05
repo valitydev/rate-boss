@@ -22,7 +22,7 @@ class FixerExchangeRateSource(
             throw ExchangeRateSourceException("Unsuccessful response from FixerApi")
         }
 
-        return ExchangeRates(
+        return ExchangeRates.fromDecimals(
             rates = fixerLatestResponse.rates!!,
             timestamp = fixerLatestResponse.timestamp!!,
         )
