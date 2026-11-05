@@ -34,7 +34,6 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestTemplate
-import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
@@ -77,7 +76,7 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
 
     @BeforeEach
     fun setUp() {
-        whenever(clock.withZone(any())).thenReturn(Clock.fixed(Instant.parse("2026-10-31T12:00:00Z"), ZoneId.of("Europe/Warsaw")))
+        whenever(clock.withZone(any())).thenReturn(Clock.fixed(Instant.parse("2026-11-07T12:00:00Z"), ZoneId.of("Europe/Warsaw")))
         server = MockRestServiceServer.createServer(restTemplate)
         dslContext.deleteFrom(EX_RATE).execute()
     }
@@ -88,11 +87,8 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
     }
 
     @ParameterizedTest
-    @CsvSource("4, 1, 4, 10000, 2500, 1", "4.25, 4, 17, 20001, 80004, 17", "4.25, 4, 17, 0, 0, 1")
-    fun `retry fetching Friday's quote and expose the exact Saturday rate through both APIs`(
-        mid: BigDecimal,
-        numerator: Long,
-        denominator: Long,
+    @CsvSource("10000, 25000000, 10979", "20001, 50002500, 10979", "0, 0, 1")
+    fun `retry fetching the latest quote and expose the exact Saturday rate through both APIs`(
         amount: Long,
         convertedNumerator: Long,
         convertedDenominator: Long,
@@ -108,7 +104,12 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
             .andExpect(method(HttpMethod.GET))
             .andRespond(
                 withSuccess(
-                    """{"code":"EUR","rates":[{"mid":$mid,"effectiveDate":"2026-10-30"}]}""",
+                    """
+                    {
+                      "table": "A", "currency": "euro", "code": "EUR",
+                      "rates": [{"no": "216/A/NBP/2026", "effectiveDate": "2026-11-05", "mid": 4.3916}]
+                    }
+                    """.trimIndent(),
                     MediaType.APPLICATION_JSON,
                 ),
             )
@@ -123,20 +124,20 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
             assertEquals("EUR", record.destinationCurrencySymbolicCode)
             assertEquals(2.toShort(), record.sourceCurrencyExponent)
             assertEquals(2.toShort(), record.destinationCurrencyExponent)
-            assertEquals(numerator, record.rationalP)
-            assertEquals(denominator, record.rationalQ)
-            assertEquals(LocalDateTime.of(2026, 10, 31, 0, 0), record.rateTimestamp)
+            assertEquals(2500L, record.rationalP)
+            assertEquals(10979L, record.rationalQ)
+            assertEquals(LocalDateTime.of(2026, 11, 7, 0, 0), record.rateTimestamp)
         }
 
         val rate =
             handler.getExchangeRateData(
                 GetCurrencyExchangeRateRequest()
                     .setCurrencyData(CurrencyData("PLN", "EUR"))
-                    .setDatetime("2026-10-31T12:00:00Z"),
+                    .setDatetime("2026-11-07T12:00:00Z"),
             )
         assertEquals(CurrencyData("PLN", "EUR"), rate.currencyData)
-        assertEquals("2026-10-31T00:00:00Z", rate.timestamp)
-        assertEquals(BigFraction(numerator, denominator), BigFraction(rate.exchange_rate.p, rate.exchange_rate.q))
+        assertEquals("2026-11-07T00:00:00Z", rate.timestamp)
+        assertEquals(BigFraction(2500, 10979), BigFraction(rate.exchange_rate.p, rate.exchange_rate.q))
 
         val converted =
             handler.getConvertedAmount(
@@ -145,7 +146,7 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
                     .setSource("PLN")
                     .setDestination("EUR")
                     .setAmount(amount)
-                    .setDatetime("2026-10-31T12:00:00Z"),
+                    .setDatetime("2026-11-07T12:00:00Z"),
             )
         assertEquals(BigFraction(convertedNumerator, convertedDenominator), BigFraction(converted.p, converted.q))
     }

@@ -43,8 +43,9 @@ class NbpApiClientTest {
         server.verify()
     }
 
-    @Test
-    fun `fetch EUR quote as a decimal and ignore extra response fields`() {
+    @ParameterizedTest
+    @ValueSource(strings = ["4.3916", "4.1234567890123456789"])
+    fun `fetch EUR quote as an exact decimal and ignore extra response fields`(mid: String) {
         server
             .expect(requestTo("https://api.nbp.pl/api/exchangerates/rates/A/EUR/?format=json"))
             .andExpect(method(HttpMethod.GET))
@@ -53,7 +54,7 @@ class NbpApiClientTest {
                     """
                     {
                       "table": "A", "currency": "euro", "code": "EUR",
-                      "rates": [{"no": "211/A/NBP/2026", "effectiveDate": "2026-10-30", "mid": 4.1234567890123456789}]
+                      "rates": [{"no": "216/A/NBP/2026", "effectiveDate": "2026-11-05", "mid": $mid}]
                     }
                     """.trimIndent(),
                     MediaType.APPLICATION_JSON,
@@ -63,8 +64,8 @@ class NbpApiClientTest {
         val response = client.getExchangeRates()
 
         assertEquals("EUR", response.code)
-        assertEquals(BigDecimal("4.1234567890123456789"), response.rates!!.single().mid)
-        assertEquals("2026-10-30", response.rates.single().effectiveDate)
+        assertEquals(BigDecimal(mid), response.rates!!.single().mid)
+        assertEquals("2026-11-05", response.rates.single().effectiveDate)
     }
 
     @Test

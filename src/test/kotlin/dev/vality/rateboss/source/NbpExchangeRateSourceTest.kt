@@ -28,34 +28,34 @@ class NbpExchangeRateSourceTest {
     private val client: NbpApiClient = mock()
     private val properties = TestConfig().testRatesProperties()
     private val source =
-        NbpExchangeRateSource(client, properties, Clock.fixed(Instant.parse("2026-10-31T12:00:00Z"), ZoneOffset.UTC))
+        NbpExchangeRateSource(client, properties, Clock.fixed(Instant.parse("2026-11-07T12:00:00Z"), ZoneOffset.UTC))
 
     @ParameterizedTest
-    @CsvSource("4, 1, 4", "4.25, 4, 17", "4.25000, 4, 17", "4.25E+0, 4, 17", "4E+1, 1, 40")
+    @CsvSource("4, 1, 4", "4.3916, 2500, 10979", "4.3916000, 2500, 10979", "4.3916E+0, 2500, 10979", "4E+1, 1, 40")
     fun `invert the EUR quote exactly and apply it to Saturday`(
         mid: BigDecimal,
         numerator: Long,
         denominator: Long,
     ) {
         whenever(client.getExchangeRates()).thenReturn(
-            NbpRatesResponse("EUR", listOf(NbpRateItem(mid, "2026-10-30"))),
+            NbpRatesResponse("EUR", listOf(NbpRateItem(mid, "2026-11-05"))),
         )
 
         val exchangeRates = source.getExchangeRate("PLN")
 
         assertEquals(mapOf("EUR" to RateValue.Fraction(BigFraction(numerator, denominator))), exchangeRates.rates)
-        assertEquals(Instant.parse("2026-10-31T00:00:00Z").epochSecond, exchangeRates.timestamp)
+        assertEquals(Instant.parse("2026-11-07T00:00:00Z").epochSecond, exchangeRates.timestamp)
         assertEquals("nbp", source.getSourceId())
     }
 
     @ParameterizedTest
-    @CsvSource("2026-10-30T23:30:00Z, 2026-10-31T00:00:00Z", "2026-10-30T22:30:00Z, 2026-10-30T00:00:00Z")
+    @CsvSource("2026-11-06T23:30:00Z, 2026-11-07T00:00:00Z", "2026-11-06T22:30:00Z, 2026-11-06T00:00:00Z")
     fun `determine the polling day in Warsaw`(
         now: String,
         expectedTimestamp: String,
     ) {
         whenever(client.getExchangeRates()).thenReturn(
-            NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.25"), "2026-10-30"))),
+            NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.3916"), "2026-11-06"))),
         )
         val sourceWithFixedClock = NbpExchangeRateSource(client, properties, Clock.fixed(Instant.parse(now), ZoneOffset.UTC))
 
@@ -63,12 +63,12 @@ class NbpExchangeRateSourceTest {
     }
 
     @Test
-    fun `use the last published quote when Friday was also a holiday`() {
+    fun `use the last published quote when no quote was published on Friday`() {
         whenever(client.getExchangeRates()).thenReturn(
-            NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.25"), "2026-10-29"))),
+            NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.3916"), "2026-11-05"))),
         )
 
-        assertEquals(Instant.parse("2026-10-31T00:00:00Z").epochSecond, source.getExchangeRate("PLN").timestamp)
+        assertEquals(Instant.parse("2026-11-07T00:00:00Z").epochSecond, source.getExchangeRate("PLN").timestamp)
     }
 
     @ParameterizedTest
@@ -103,21 +103,21 @@ class NbpExchangeRateSourceTest {
     companion object {
         @JvmStatic
         fun invalidResponses(): List<NbpRatesResponse> {
-            val valid = NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.25"), "2026-10-30")))
+            val valid = NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.3916"), "2026-11-05")))
             return listOf(
                 valid.copy(code = null),
                 valid.copy(code = "USD"),
                 valid.copy(rates = null),
                 valid.copy(rates = emptyList()),
-                valid.copy(rates = listOf(NbpRateItem(null, "2026-10-30"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal.ZERO, "2026-10-30"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("-4.25"), "2026-10-30"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("1E-19"), "2026-10-30"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("1E+19"), "2026-10-30"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.25"), null))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.25"), ""))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.25"), "30.10.2026"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.25"), "2026-02-30"))),
+                valid.copy(rates = listOf(NbpRateItem(null, "2026-11-05"))),
+                valid.copy(rates = listOf(NbpRateItem(BigDecimal.ZERO, "2026-11-05"))),
+                valid.copy(rates = listOf(NbpRateItem(BigDecimal("-4.3916"), "2026-11-05"))),
+                valid.copy(rates = listOf(NbpRateItem(BigDecimal("1E-19"), "2026-11-05"))),
+                valid.copy(rates = listOf(NbpRateItem(BigDecimal("1E+19"), "2026-11-05"))),
+                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.3916"), null))),
+                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.3916"), ""))),
+                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.3916"), "05.11.2026"))),
+                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.3916"), "2026-02-30"))),
             )
         }
     }
