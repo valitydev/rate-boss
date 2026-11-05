@@ -25,10 +25,10 @@ class HttpPropertiesTest {
         "PT5S, PT-1S",
         "PT0.0001S, PT15S",
         "PT5S, PT0.0001S",
-        "PT2147483.648S, PT15S",
-        "PT5S, PT2147483.648S",
+        "PT60.001S, PT15S",
+        "PT5S, PT60.001S",
     )
-    fun `reject timeouts outside the HTTP client's millisecond range`(
+    fun `reject timeouts outside the allowed range`(
         connect: String,
         read: String,
     ) {
@@ -38,7 +38,7 @@ class HttpPropertiesTest {
     }
 
     @ParameterizedTest
-    @CsvSource("PT0.001S, PT2147483.647S", "PT2147483.647S, PT0.001S")
+    @CsvSource("PT0.001S, PT60S", "PT60S, PT0.001S")
     fun `accept timeouts at both range boundaries`(
         connect: String,
         read: String,

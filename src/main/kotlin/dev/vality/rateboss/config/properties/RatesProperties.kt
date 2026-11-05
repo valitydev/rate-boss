@@ -93,8 +93,8 @@ data class HttpProperties(
     val readTimeout: Duration = Duration.ofSeconds(15),
 ) {
     init {
-        val allowedTimeouts = Duration.ofMillis(1)..Duration.ofMillis(Int.MAX_VALUE.toLong())
-        require(connectTimeout in allowedTimeouts) { "HTTP connectTimeout must be between 1ms and ${Int.MAX_VALUE}ms" }
-        require(readTimeout in allowedTimeouts) { "HTTP readTimeout must be between 1ms and ${Int.MAX_VALUE}ms" }
+        val allowedTimeouts = Duration.ofMillis(1)..Duration.ofSeconds(60)
+        require(connectTimeout in allowedTimeouts) { "HTTP connectTimeout must be between 1ms and 60s" }
+        require(readTimeout in allowedTimeouts) { "HTTP readTimeout must be between 1ms and 60s" }
     }
 }
