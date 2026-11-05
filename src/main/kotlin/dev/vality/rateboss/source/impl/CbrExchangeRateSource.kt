@@ -50,7 +50,7 @@ class CbrExchangeRateSource(
             }
         val nextDayTimestamp = responseDate.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC)
         log.info("Exchange rates from cbr have been retrieved, date=$responseDate, exchangeRates=$rates, targetTimestamp=$nextDayTimestamp")
-        return ExchangeRates(
+        return ExchangeRates.fromDecimals(
             rates = rates,
             timestamp = nextDayTimestamp,
         )

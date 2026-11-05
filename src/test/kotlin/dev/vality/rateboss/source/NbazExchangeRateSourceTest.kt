@@ -3,6 +3,7 @@ package dev.vality.rateboss.source
 import dev.vality.rateboss.client.nbaz.NbazApiClient
 import dev.vality.rateboss.config.TestConfig
 import dev.vality.rateboss.source.impl.NbazExchangeRateSource
+import dev.vality.rateboss.source.model.RateValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -90,8 +91,8 @@ class NbazExchangeRateSourceTest {
 
         assertNotNull(exchangeRate)
         assertTrue(exchangeRate.rates.isNotEmpty())
-        assertEquals(BigDecimal("1.7"), exchangeRate.rates["USD"])
-        assertEquals(BigDecimal("0.001128"), exchangeRate.rates["KRW"])
+        assertEquals(RateValue.Decimal(BigDecimal("1.7")), exchangeRate.rates["USD"])
+        assertEquals(RateValue.Decimal(BigDecimal("0.001128")), exchangeRate.rates["KRW"])
         assertTrue(!exchangeRate.rates.containsKey("XAU"))
     }
 
@@ -117,7 +118,7 @@ class NbazExchangeRateSourceTest {
 
         val exchangeRate = exchangeRateSource.getExchangeRate(currencySymbolCode)
 
-        assertEquals(BigDecimal("1.7"), exchangeRate.rates["USD"])
+        assertEquals(RateValue.Decimal(BigDecimal("1.7")), exchangeRate.rates["USD"])
         assertTrue(!exchangeRate.rates.containsKey("BROKEN"))
     }
 }

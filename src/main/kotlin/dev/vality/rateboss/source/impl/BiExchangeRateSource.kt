@@ -65,7 +65,7 @@ class BiExchangeRateSource(
         val dayTimestamp = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC)
         log.info { "Exchange rates from bi have been retrieved, date=$date, exchangeRates=$rates, targetTimestamp=$dayTimestamp" }
 
-        return ExchangeRates(
+        return ExchangeRates.fromDecimals(
             rates = rates,
             timestamp = dayTimestamp,
         )

@@ -7,6 +7,7 @@ import dev.vality.rateboss.job.FixerExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbazExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbkrExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbkzExchangeGrabberMasterJob
+import dev.vality.rateboss.job.NbpExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbuzExchangeGrabberMasterJob
 import org.quartz.*
 import org.quartz.impl.JobDetailImpl
@@ -96,6 +97,16 @@ class JobConfig {
             }
             if (runOnStartup) {
                 schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbazJob.jobKey))
+            }
+        }
+        val nbpJobTriggerName = ratesProperties.nbpJob.jobTriggerName
+        if (nbpJobTriggerName.isNotEmpty()) {
+            schedulerFactoryBean.addJob(nbpExchangeRateGrabberMasterJob(), true, true)
+            if (!schedulerFactoryBean.checkExists(TriggerKey(nbpJobTriggerName))) {
+                schedulerFactoryBean.scheduleJob(nbpExchangeRateGrabberMasterTrigger())
+            }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbpJob.jobKey))
             }
         }
     }
@@ -203,5 +214,20 @@ class JobConfig {
             .forJob(nbazExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.nbazJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbazJob.jobCron))
+            .build()
+
+    fun nbpExchangeRateGrabberMasterJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(ratesProperties.nbpJob.jobKey)
+        jobDetail.jobClass = NbpExchangeGrabberMasterJob::class.java
+        return jobDetail
+    }
+
+    fun nbpExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
+            .forJob(nbpExchangeRateGrabberMasterJob())
+            .withIdentity(ratesProperties.nbpJob.jobTriggerName)
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbpJob.jobCron))
             .build()
 }

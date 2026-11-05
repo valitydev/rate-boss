@@ -39,7 +39,7 @@ class ExchangeDaoServiceTest : ContainerConfiguration() {
         val baseCurrencySymbolCode = "USD"
         val baseCurrencyExponent = 2
         val exchangeRates =
-            ExchangeRates(
+            ExchangeRates.fromDecimals(
                 rates =
                     mapOf(
                         "RUB" to BigDecimal.valueOf(56.761762),

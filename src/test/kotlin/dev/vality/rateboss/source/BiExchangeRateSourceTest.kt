@@ -3,6 +3,7 @@ package dev.vality.rateboss.source
 import dev.vality.rateboss.client.bi.BiApiClient
 import dev.vality.rateboss.config.TestConfig
 import dev.vality.rateboss.source.impl.BiExchangeRateSource
+import dev.vality.rateboss.source.model.RateValue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -79,7 +80,7 @@ class BiExchangeRateSourceTest {
         assertNotNull(exchangeRate)
         assertTrue(exchangeRate.rates.isNotEmpty())
         assertTrue(exchangeRate.rates.containsKey("USD"))
-        assertEquals(BigDecimal("0.05607983974624994"), exchangeRate.rates["USD"])
+        assertEquals(RateValue.Decimal(BigDecimal("0.05607983974624994")), exchangeRate.rates["USD"])
     }
 
     @Test
@@ -110,6 +111,6 @@ class BiExchangeRateSourceTest {
 
         val exchangeRate = exchangeRateSource.getExchangeRate(currencySymbolCode)
 
-        assertEquals(BigDecimal("0.05607983974624994"), exchangeRate.rates["USD"])
+        assertEquals(RateValue.Decimal(BigDecimal("0.05607983974624994")), exchangeRate.rates["USD"])
     }
 }

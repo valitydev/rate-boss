@@ -2,7 +2,7 @@
 
 Rate-boss periodically pulls exchange rates from external sources, stores them in the database, and optionally publishes rate events to Kafka. It also exposes API endpoints to read the latest or historical rates and to convert amounts by timestamp.
 
-Supported sources today: Fixer, CBR, BI, NBKZ.
+Supported sources today: Fixer, CBR, BI, NBKZ, NBKR, NBUZ, NBAZ, NBP.
 
 ## Service flow (actual)
 
@@ -12,7 +12,7 @@ flowchart TD
     M[ExchangeGrabberMasterJob<br/>per source] -->|per currency| J[ExchangeGrabberJob]
   end
 
-  J -->|HTTP fetch| S[ExchangeRateSource<br/>Fixer / CBR / NBKZ]
+  J -->|HTTP fetch| S[ExchangeRateSource<br/>Fixer / CBR / BI / NBKZ / NBKR / NBUZ / NBAZ / NBP]
   S -->|rates + timestamp| D[ExchangeDaoService]
   D -->|save batch| DB[(PostgreSQL<br/>rb.ex_rate)]
   J -->|optional publish| E[ExchangeEventService]

@@ -58,6 +58,7 @@ class FixerExchangeGrabberJobTest : ContainerConfiguration() {
 
     @BeforeEach
     fun setUp() {
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbpJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkrJob.jobTriggerName))
@@ -70,7 +71,7 @@ class FixerExchangeGrabberJobTest : ContainerConfiguration() {
     fun `test grabber job`() {
         whenever(fixerExchangeRateSource.getSourceId()).thenReturn("sourceId")
         whenever(fixerExchangeRateSource.getExchangeRate(any())).then {
-            ExchangeRates(
+            ExchangeRates.fromDecimals(
                 rates =
                     mapOf(
                         "AED" to BigDecimal.valueOf(3.593066),

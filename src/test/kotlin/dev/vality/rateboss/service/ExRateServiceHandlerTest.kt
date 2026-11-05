@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.quartz.Scheduler
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -206,5 +208,36 @@ class ExRateServiceHandlerTest : ContainerConfiguration() {
         assertNotNull(result)
         assertEquals(expected.numeratorAsLong, result.p)
         assertEquals(expected.denominatorAsLong, result.q)
+    }
+
+    @ParameterizedTest
+    @CsvSource("9223372036854775807, 1, 2", "9223372036854775807, 1, -2", "2352941176470588, 10000000000000000, 20001")
+    fun `fail explicitly when the converted result exceeds the wire format`(
+        numerator: Long,
+        denominator: Long,
+        amount: Long,
+    ) {
+        val exRate =
+            ExRate().apply {
+                sourceCurrencySymbolicCode = "PLN"
+                sourceCurrencyExponent = 2
+                destinationCurrencySymbolicCode = "EUR"
+                destinationCurrencyExponent = 2
+                rationalP = numerator
+                rationalQ = denominator
+                rateTimestamp = LocalDateTime.of(2026, 10, 31, 0, 0)
+                source = "nbp"
+            }
+        dslContext.insertInto(Tables.EX_RATE).set(dslContext.newRecord(Tables.EX_RATE, exRate)).execute()
+        val request =
+            ConversionRequest()
+                .setSource("PLN")
+                .setDestination("EUR")
+                .setAmount(amount)
+                .setDatetime("2026-10-31T12:00:00Z")
+
+        val exception = assertThrows<ArithmeticException> { exRateServiceHandler.getConvertedAmount("nbp", request) }
+
+        assertTrue(exception.message!!.contains("64-bit"))
     }
 }

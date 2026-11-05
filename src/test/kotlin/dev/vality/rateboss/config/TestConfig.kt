@@ -71,6 +71,12 @@ class TestConfig {
                 "nbaz-name",
                 listOf(CurrencyProperties("AZN", 2)),
             ),
+            JobDescription(
+                "nbp-cron",
+                "nbp-key",
+                "nbp-name",
+                listOf(CurrencyProperties("PLN", 2)),
+            ),
             RatesSourceProperties(
                 FixerProperties("url", "key"),
                 CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow")),
@@ -92,6 +98,7 @@ class TestConfig {
                     "dd.MM.yyyy",
                     ZoneId.of("Asia/Baku"),
                 ),
+                NbpProperties("https://api.nbp.pl/api/exchangerates/rates/A/EUR/"),
             ),
         )
 }

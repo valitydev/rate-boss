@@ -43,7 +43,7 @@ class NbkrExchangeRateSource(
             "Exchange rates from nbkr have been retrieved, date=$responseDate, " +
                 "exchangeRates=$rates, targetTimestamp=$nextDayTimestamp"
         }
-        return ExchangeRates(
+        return ExchangeRates.fromDecimals(
             rates = rates,
             timestamp = nextDayTimestamp,
         )

@@ -1,5 +1,6 @@
 package dev.vality.rateboss.extensions
 
+import org.apache.commons.math3.fraction.BigFraction
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -22,7 +23,12 @@ fun BigDecimal.toRational(): Rational {
     return Rational(numerator.longValueExact(), denominator.longValueExact())
 }
 
-data class Rational(
-    val numerator: Long,
-    val denominator: Long,
-)
+fun BigDecimal.toBigFraction(): BigFraction {
+    val normalized = stripTrailingZeros()
+    val scale = normalized.scale()
+    return if (scale >= 0) {
+        BigFraction(normalized.unscaledValue(), BigInteger.TEN.pow(scale))
+    } else {
+        BigFraction(normalized.unscaledValue().multiply(BigInteger.TEN.pow(-scale)), BigInteger.ONE)
+    }
+}

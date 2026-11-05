@@ -36,7 +36,7 @@ class NbuzExchangeRateSource(
         }
         val nextDayTimestamp = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC)
         log.info { "Exchange rates from nbuz have been retrieved, date=$date, exchangeRates=$rates, targetTimestamp=$nextDayTimestamp" }
-        return ExchangeRates(
+        return ExchangeRates.fromDecimals(
             rates = rates,
             timestamp = nextDayTimestamp,
         )

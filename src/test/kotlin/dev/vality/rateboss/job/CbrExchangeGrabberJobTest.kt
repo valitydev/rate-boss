@@ -47,6 +47,7 @@ class CbrExchangeGrabberJobTest : ContainerConfiguration() {
 
     @BeforeEach
     fun setUp() {
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbpJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.fixerJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkrJob.jobTriggerName))
@@ -59,7 +60,7 @@ class CbrExchangeGrabberJobTest : ContainerConfiguration() {
     fun `test grabber job`() {
         whenever(cbrExchangeRateSource.getSourceId()).thenReturn("sourceId")
         whenever(cbrExchangeRateSource.getExchangeRate(any())).then {
-            ExchangeRates(
+            ExchangeRates.fromDecimals(
                 rates =
                     mapOf(
                         "USD" to BigDecimal.valueOf(90.593066),

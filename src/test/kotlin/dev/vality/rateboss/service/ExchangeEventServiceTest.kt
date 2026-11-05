@@ -2,8 +2,10 @@ package dev.vality.rateboss.service
 
 import dev.vality.exrates.events.CurrencyEvent
 import dev.vality.rateboss.ContainerConfiguration
+import dev.vality.rateboss.extensions.toRational
 import dev.vality.rateboss.source.model.ExchangeRates
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -34,7 +36,7 @@ class ExchangeEventServiceTest : ContainerConfiguration() {
         val baseCurrencySymbolCode = "USD"
         val baseCurrencyExponent = 2
         val exchangeRates =
-            ExchangeRates(
+            ExchangeRates.fromDecimals(
                 rates =
                     mapOf(
                         "RUB" to BigDecimal.valueOf(56.761762),
@@ -59,7 +61,7 @@ class ExchangeEventServiceTest : ContainerConfiguration() {
         val rubExchangeRate = BigDecimal.valueOf(56.761762)
         val btcExchangeRate = BigDecimal.valueOf(5.0203877e-05)
         val exchangeRates =
-            ExchangeRates(
+            ExchangeRates.fromDecimals(
                 rates =
                     mapOf(
                         "RUB" to rubExchangeRate,
@@ -74,6 +76,13 @@ class ExchangeEventServiceTest : ContainerConfiguration() {
         // Then
         val argumentCaptor = argumentCaptor<ProducerRecord<String, CurrencyEvent>>()
         verify(kafkaTemplate, times(2)).send(argumentCaptor.capture())
+        for ((record, rate) in argumentCaptor.allValues.zip(listOf(rubExchangeRate, btcExchangeRate))) {
+            val payload = record.value().payload.exchangeRate
+            val rational = rate.toRational()
+            assertEquals(rate.scale().toShort(), payload.destinationCurrency.exponent)
+            assertEquals(rational.numerator, payload.exchange_rate.p)
+            assertEquals(rational.denominator, payload.exchange_rate.q)
+        }
         val firstRecordCurrencyEvent = argumentCaptor.allValues[0].value()
         val secondRecordCurrencyEvent = argumentCaptor.allValues[1].value()
         val firstRecordExchangeRate =

@@ -8,4 +8,5 @@ object ExRateSources {
     const val NBKR = "nbkr"
     const val NBUZ = "nbuz"
     const val NBAZ = "nbaz"
+    const val NBP = "nbp"
 }

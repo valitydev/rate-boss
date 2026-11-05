@@ -47,6 +47,7 @@ class NbkzExchangeGrabberJobTest : ContainerConfiguration() {
 
     @BeforeEach
     fun setUp() {
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.nbpJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.fixerJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkrJob.jobTriggerName))
@@ -59,7 +60,7 @@ class NbkzExchangeGrabberJobTest : ContainerConfiguration() {
     fun `test grabber job`() {
         whenever(nbkzExchangeRateSource.getSourceId()).thenReturn("sourceId")
         whenever(nbkzExchangeRateSource.getExchangeRate(any())).then {
-            ExchangeRates(
+            ExchangeRates.fromDecimals(
                 rates =
                     mapOf(
                         "USD" to BigDecimal.valueOf(470.12),
