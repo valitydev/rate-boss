@@ -4,6 +4,7 @@ import dev.vality.rateboss.client.nbp.NbpApiClient
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.extensions.toBigFraction
 import dev.vality.rateboss.job.constant.ExRateSources
+import dev.vality.rateboss.model.NbpRateItem
 import dev.vality.rateboss.model.NbpRatesResponse
 import dev.vality.rateboss.source.ExchangeRateSource
 import dev.vality.rateboss.source.ExchangeRateSourceException
@@ -32,42 +33,60 @@ class NbpExchangeRateSource(
         }
         val pollingDate = LocalDate.now(clock.withZone(ratesProperties.source.nbp.timeZone))
         log.info { "Trying to get exchange rates from nbp for currency=$currencySymbolCode" }
-        val quote = parseQuote(fetchDailyRates())
-        val rates = mapOf("EUR" to quote.rate)
+        val table = parseTable(fetchDailyRates())
         val dayTimestamp = pollingDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC)
         log.info {
-            "Exchange rates from nbp have been retrieved, effectiveDate=${quote.publicationDate}, " +
-                "pollingDate=$pollingDate, exchangeRates=$rates, targetTimestamp=$dayTimestamp"
+            "Exchange rates from nbp have been retrieved, effectiveDate=${table.publicationDate}, " +
+                "pollingDate=$pollingDate, exchangeRates=${table.rates}, targetTimestamp=$dayTimestamp"
         }
-        return ExchangeRates(rates = rates, timestamp = dayTimestamp)
+        return ExchangeRates(rates = table.rates, timestamp = dayTimestamp)
     }
 
     override fun getSourceId(): String = ExRateSources.NBP
 
-    private fun fetchDailyRates(): NbpRatesResponse =
+    private fun fetchDailyRates(): List<NbpRatesResponse> =
         try {
             nbpApiClient.getExchangeRates()
         } catch (e: Exception) {
             throw ExchangeRateSourceException("Failed to get daily rates from nbp", e)
         }
 
-    private fun parseQuote(response: NbpRatesResponse): Quote =
+    private fun parseTable(response: List<NbpRatesResponse>): ExchangeRateTable =
         try {
-            require(response.code == "EUR") { "Expected EUR rate from NbpApi" }
-            val rate = requireNotNull(response.rates?.firstOrNull()) { "Missing rate from NbpApi" }
-            val mid = requireNotNull(rate.mid) { "Missing mid from NbpApi" }
-            require(mid > BigDecimal.ZERO) { "Non-positive mid from NbpApi" }
-            val publicationDate = LocalDate.parse(requireNotNull(rate.effectiveDate) { "Missing effectiveDate from NbpApi" })
-            val exactRate = RateValue.Fraction(mid.toBigFraction().reciprocal())
-            // Ensure the numerator and denominator fit in Long before returning the rate.
-            exactRate.toRational()
-            Quote(exactRate, publicationDate)
+            val table = response.single()
+            val publicationDate = LocalDate.parse(requireNotNull(table.effectiveDate) { "Missing effectiveDate from NbpApi" })
+            val items = requireNotNull(table.rates) { "Missing rates from NbpApi" }
+            ExchangeRateTable(buildRatesMap(items), publicationDate)
         } catch (e: Exception) {
             throw ExchangeRateSourceException("Invalid response from NbpApi", e)
         }
 
-    private data class Quote(
-        val rate: RateValue.Fraction,
+    private fun buildRatesMap(items: List<NbpRateItem>): Map<String, RateValue.Fraction> {
+        require(items.isNotEmpty()) { "Empty rates from NbpApi" }
+        val rates = mutableMapOf<String, RateValue.Fraction>()
+        for (item in items) {
+            val code = requireNotNull(item.code) { "Missing currency code from NbpApi" }
+            require(code.isNotBlank()) { "Blank currency code from NbpApi" }
+            require(code !in rates) { "Duplicate currency code from NbpApi: $code" }
+            rates[code] = parseRate(item, code)
+        }
+        return rates
+    }
+
+    private fun parseRate(
+        item: NbpRateItem,
+        code: String,
+    ): RateValue.Fraction {
+        val mid = requireNotNull(item.mid) { "Missing mid from NbpApi for $code" }
+        require(mid > BigDecimal.ZERO) { "Non-positive mid from NbpApi for $code" }
+        val exactRate = RateValue.Fraction(mid.toBigFraction().reciprocal())
+        // Ensure the numerator and denominator fit in Long before returning the rate.
+        exactRate.toRational()
+        return exactRate
+    }
+
+    private data class ExchangeRateTable(
+        val rates: Map<String, RateValue.Fraction>,
         val publicationDate: LocalDate,
     )
 }

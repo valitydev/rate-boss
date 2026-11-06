@@ -45,17 +45,20 @@ class NbpApiClientTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["4.3916", "4.1234567890123456789"])
-    fun `fetch EUR quote as an exact decimal and ignore extra response fields`(mid: String) {
+    fun `fetch table quotes as exact decimals and ignore extra response fields`(mid: String) {
         server
-            .expect(requestTo("https://api.nbp.pl/api/exchangerates/rates/A/EUR/?format=json"))
+            .expect(requestTo("https://api.nbp.pl/api/exchangerates/tables/A/?format=json"))
             .andExpect(method(HttpMethod.GET))
             .andRespond(
                 withSuccess(
                     """
-                    {
-                      "table": "A", "currency": "euro", "code": "EUR",
-                      "rates": [{"no": "216/A/NBP/2026", "effectiveDate": "2026-11-05", "mid": $mid}]
-                    }
+                    [{
+                      "table": "A", "no": "216/A/NBP/2026", "effectiveDate": "2026-11-05",
+                      "rates": [
+                        {"currency": "euro", "code": "EUR", "mid": $mid},
+                        {"currency": "dolar amerykański", "code": "USD", "mid": 3.9101}
+                      ]
+                    }]
                     """.trimIndent(),
                     MediaType.APPLICATION_JSON,
                 ),
@@ -63,9 +66,10 @@ class NbpApiClientTest {
 
         val response = client.getExchangeRates()
 
-        assertEquals("EUR", response.code)
-        assertEquals(BigDecimal(mid), response.rates!!.single().mid)
-        assertEquals("2026-11-05", response.rates.single().effectiveDate)
+        val table = response.single()
+        assertEquals("2026-11-05", table.effectiveDate)
+        assertEquals(listOf("EUR", "USD"), table.rates!!.map { it.code })
+        assertEquals(listOf(BigDecimal(mid), BigDecimal("3.9101")), table.rates.map { it.mid })
     }
 
     @Test
@@ -98,6 +102,6 @@ class NbpApiClientTest {
     }
 
     companion object {
-        private const val ENDPOINT = "https://api.nbp.pl/api/exchangerates/rates/A/EUR/?format=json"
+        private const val ENDPOINT = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json"
     }
 }

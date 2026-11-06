@@ -14,14 +14,14 @@ class NbpApiClient(
     private val restTemplate: RestTemplate,
     private val ratesProperties: RatesProperties,
 ) {
-    fun getExchangeRates(): NbpRatesResponse {
+    fun getExchangeRates(): List<NbpRatesResponse> {
         val url =
             UriComponentsBuilder
                 .fromUriString(ratesProperties.source.nbp.rootUrl)
                 .queryParam("format", "json")
                 .build()
                 .toUriString()
-        return checkNotNull(restTemplate.exchange<NbpRatesResponse>(url, HttpMethod.GET, HttpEntity.EMPTY).body) {
+        return checkNotNull(restTemplate.exchange<List<NbpRatesResponse>>(url, HttpMethod.GET, HttpEntity.EMPTY).body) {
             "Empty response from NbpApi"
         }
     }

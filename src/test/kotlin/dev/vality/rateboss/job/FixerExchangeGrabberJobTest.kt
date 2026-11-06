@@ -15,6 +15,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.quartz.JobKey
 import org.quartz.Scheduler
 import org.quartz.TriggerKey
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,6 +59,7 @@ class FixerExchangeGrabberJobTest : ContainerConfiguration() {
 
     @BeforeEach
     fun setUp() {
+        scheduler.pauseTrigger(TriggerKey(ratesProperties.fixerJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbpJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))
@@ -82,6 +84,8 @@ class FixerExchangeGrabberJobTest : ContainerConfiguration() {
         }
         val future = CompletableFuture<SendResult<String, CurrencyEvent>>()
         whenever(kafkaTemplate.send(any<ProducerRecord<String, CurrencyEvent>>())).thenReturn(future)
+
+        scheduler.triggerJob(JobKey(ratesProperties.fixerJob.jobKey))
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {
             verify(exchangeEventService, atLeastOnce()).sendExchangeRates(any(), any(), any())

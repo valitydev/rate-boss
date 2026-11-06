@@ -163,5 +163,5 @@ rates:
       dateFormat: dd.MM.yyyy
       timeZone: Asia/Baku
     nbp:
-      rootUrl: https://api.nbp.pl/api/exchangerates/rates/A/EUR/
+      rootUrl: https://api.nbp.pl/api/exchangerates/tables/A/
       timeZone: Europe/Warsaw
