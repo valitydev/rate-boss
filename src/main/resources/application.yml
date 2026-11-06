@@ -135,6 +135,13 @@ rates:
     currencies:
       - symbolCode: "PLN"
         exponent: 2
+  ecbJob:
+    jobCron: '0 0 0/1 * * ?'
+    jobKey: 'ecb-exchange-rate-grabber-master-job'
+    jobTriggerName: 'ecb-exchange-rate-grabber-master-job-trigger'
+    currencies:
+      - symbolCode: "EUR"
+        exponent: 2
   source:
     fixer:
       rootUrl: https://api.apilayer.com/fixer/
@@ -165,3 +172,6 @@ rates:
     nbp:
       rootUrl: https://api.nbp.pl/api/exchangerates/tables/A/
       timeZone: Europe/Warsaw
+    ecb:
+      rootUrl: https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml
+      timeZone: Europe/Berlin

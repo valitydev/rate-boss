@@ -3,6 +3,7 @@ package dev.vality.rateboss.config
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.job.BiExchangeGrabberMasterJob
 import dev.vality.rateboss.job.CbrExchangeGrabberMasterJob
+import dev.vality.rateboss.job.EcbExchangeGrabberMasterJob
 import dev.vality.rateboss.job.FixerExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbazExchangeGrabberMasterJob
 import dev.vality.rateboss.job.NbkrExchangeGrabberMasterJob
@@ -107,6 +108,16 @@ class JobConfig {
             }
             if (runOnStartup) {
                 schedulerFactoryBean.triggerJob(JobKey(ratesProperties.nbpJob.jobKey))
+            }
+        }
+        val ecbJobTriggerName = ratesProperties.ecbJob.jobTriggerName
+        if (ecbJobTriggerName.isNotEmpty()) {
+            schedulerFactoryBean.addJob(ecbExchangeRateGrabberMasterJob(), true, true)
+            if (!schedulerFactoryBean.checkExists(TriggerKey(ecbJobTriggerName))) {
+                schedulerFactoryBean.scheduleJob(ecbExchangeRateGrabberMasterTrigger())
+            }
+            if (runOnStartup) {
+                schedulerFactoryBean.triggerJob(JobKey(ratesProperties.ecbJob.jobKey))
             }
         }
     }
@@ -229,5 +240,20 @@ class JobConfig {
             .forJob(nbpExchangeRateGrabberMasterJob())
             .withIdentity(ratesProperties.nbpJob.jobTriggerName)
             .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.nbpJob.jobCron))
+            .build()
+
+    fun ecbExchangeRateGrabberMasterJob(): JobDetailImpl {
+        val jobDetail = JobDetailImpl()
+        jobDetail.key = JobKey(ratesProperties.ecbJob.jobKey)
+        jobDetail.jobClass = EcbExchangeGrabberMasterJob::class.java
+        return jobDetail
+    }
+
+    fun ecbExchangeRateGrabberMasterTrigger(): CronTrigger =
+        TriggerBuilder
+            .newTrigger()
+            .forJob(ecbExchangeRateGrabberMasterJob())
+            .withIdentity(ratesProperties.ecbJob.jobTriggerName)
+            .withSchedule(CronScheduleBuilder.cronSchedule(ratesProperties.ecbJob.jobCron))
             .build()
 }

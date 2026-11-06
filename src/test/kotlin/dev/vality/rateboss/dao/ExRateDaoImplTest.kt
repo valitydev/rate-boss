@@ -35,6 +35,85 @@ class ExRateDaoImplTest : ContainerConfiguration() {
     }
 
     @Test
+    fun `prefer the last inserted rate when timestamps match with or without a date filter`() {
+        val timestamp = LocalDateTime.of(2026, 11, 7, 0, 0)
+        insertRate(timestamp, 11)
+        val latest = insertRate(timestamp, 12)
+
+        for (datetime in listOf(null, "2026-11-07T12:00:00Z")) {
+            val request = GetCurrencyExchangeRateRequest(CurrencyData("EUR", "USD"))
+            if (datetime != null) {
+                request.setDatetime(datetime)
+            }
+            val result = exRateDao.getRecentBySymbolicCodes(request)
+
+            assertEquals(latest.id, result?.id)
+            assertEquals(latest.rationalP, result?.rationalP)
+        }
+        val result = exRateDao.getByCodesAndTimestamp(TimestampExchangeRateRequest("EUR", "USD", timestamp, "ecb"))
+
+        assertEquals(latest.id, result?.id)
+        assertEquals(latest.rationalP, result?.rationalP)
+    }
+
+    @Test
+    fun `prefer a newer timestamp over a higher ID`() {
+        val timestamp = LocalDateTime.of(2026, 11, 7, 0, 0)
+        val latest = insertRate(timestamp.plusHours(12), 12)
+        insertRate(timestamp, 11)
+        insertRate(timestamp.minusDays(1), 10)
+
+        for (datetime in listOf(null, "2026-11-07T12:00:00Z")) {
+            val request = GetCurrencyExchangeRateRequest(CurrencyData("EUR", "USD"))
+            if (datetime != null) {
+                request.setDatetime(datetime)
+            }
+            assertEquals(latest.id, exRateDao.getRecentBySymbolicCodes(request)?.id)
+        }
+        val request = TimestampExchangeRateRequest("EUR", "USD", timestamp, "ecb")
+
+        assertEquals(latest.id, exRateDao.getByCodesAndTimestamp(request)?.id)
+    }
+
+    @Test
+    fun `keep date and currency filters when selecting the highest ID`() {
+        val timestamp = LocalDateTime.of(2026, 11, 7, 0, 0)
+        val expected = insertRate(timestamp, 12)
+        insertRate(timestamp.plusDays(1), 13)
+        insertRate(timestamp, 14, sourceCurrency = "PLN")
+        insertRate(timestamp, 15, destinationCurrency = "JPY")
+        val request = GetCurrencyExchangeRateRequest(CurrencyData("EUR", "USD")).setDatetime("2026-11-07T12:00:00Z")
+
+        assertEquals(expected.id, exRateDao.getRecentBySymbolicCodes(request)?.id)
+
+        insertRate(timestamp, 16, source = "fixer")
+        val timestampRequest = TimestampExchangeRateRequest("EUR", "USD", timestamp, "ecb")
+
+        assertEquals(expected.id, exRateDao.getByCodesAndTimestamp(timestampRequest)?.id)
+    }
+
+    private fun insertRate(
+        timestamp: LocalDateTime,
+        numerator: Long,
+        source: String = "ecb",
+        sourceCurrency: String = "EUR",
+        destinationCurrency: String = "USD",
+    ): ExRate =
+        dslContext
+            .insertInto(EX_RATE)
+            .set(EX_RATE.SOURCE_CURRENCY_SYMBOLIC_CODE, sourceCurrency)
+            .set(EX_RATE.SOURCE_CURRENCY_EXPONENT, 2.toShort())
+            .set(EX_RATE.DESTINATION_CURRENCY_SYMBOLIC_CODE, destinationCurrency)
+            .set(EX_RATE.DESTINATION_CURRENCY_EXPONENT, 2.toShort())
+            .set(EX_RATE.RATIONAL_P, numerator)
+            .set(EX_RATE.RATIONAL_Q, 10L)
+            .set(EX_RATE.RATE_TIMESTAMP, timestamp)
+            .set(EX_RATE.SOURCE, source)
+            .returning()
+            .fetchSingle()
+            .into(ExRate::class.java)
+
+    @Test
     fun saveBatchWithSameCodes() {
         val firstExRate =
             ExRate().apply {

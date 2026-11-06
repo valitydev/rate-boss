@@ -29,7 +29,10 @@ class AppConfig {
     fun nbpClock(): Clock = Clock.systemUTC()
 
     @Bean
-    fun nbkrXmlMapper(): XmlMapper =
+    fun ecbClock(): Clock = Clock.systemUTC()
+
+    @Bean
+    fun xmlMapper(): XmlMapper =
         XmlMapper
             .builder()
             .addModule(kotlinModule())
