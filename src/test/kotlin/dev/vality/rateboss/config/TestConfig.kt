@@ -98,7 +98,7 @@ class TestConfig {
                     "dd.MM.yyyy",
                     ZoneId.of("Asia/Baku"),
                 ),
-                NbpProperties("https://api.nbp.pl/api/exchangerates/rates/A/EUR/"),
+                NbpProperties("https://api.nbp.pl/api/exchangerates/tables/A/"),
             ),
         )
 }

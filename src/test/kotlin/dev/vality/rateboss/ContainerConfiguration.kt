@@ -7,6 +7,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
+import java.util.UUID
 
 @SpringBootTest
 class ContainerConfiguration {
@@ -35,6 +36,8 @@ class ContainerConfiguration {
         @JvmStatic
         @DynamicPropertySource
         fun properties(registry: DynamicPropertyRegistry) {
+            val schedulerName = "rateboss-test-${UUID.randomUUID()}"
+            registry.add("spring.quartz.properties.org.quartz.scheduler.instanceName") { schedulerName }
             registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers)
             registry.add("spring.datasource.url", postgresql::getJdbcUrl)
             registry.add("spring.datasource.password", postgresql::getPassword)

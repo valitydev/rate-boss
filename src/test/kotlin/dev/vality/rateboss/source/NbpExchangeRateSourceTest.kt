@@ -32,18 +32,21 @@ class NbpExchangeRateSourceTest {
 
     @ParameterizedTest
     @CsvSource("4, 1, 4", "4.3916, 2500, 10979", "4.3916000, 2500, 10979", "4.3916E+0, 2500, 10979", "4E+1, 1, 40")
-    fun `invert the EUR quote exactly and apply it to Saturday`(
+    fun `invert each currency quote exactly and apply it to Saturday`(
         mid: BigDecimal,
         numerator: Long,
         denominator: Long,
     ) {
         whenever(client.getExchangeRates()).thenReturn(
-            NbpRatesResponse("EUR", listOf(NbpRateItem(mid, "2026-11-05"))),
+            listOf(NbpRatesResponse("2026-11-05", listOf(NbpRateItem(mid, "EUR"), NbpRateItem(BigDecimal("4"), "USD")))),
         )
 
         val exchangeRates = source.getExchangeRate("PLN")
 
-        assertEquals(mapOf("EUR" to RateValue.Fraction(BigFraction(numerator, denominator))), exchangeRates.rates)
+        assertEquals(
+            mapOf("EUR" to RateValue.Fraction(BigFraction(numerator, denominator)), "USD" to RateValue.Fraction(BigFraction(1, 4))),
+            exchangeRates.rates,
+        )
         assertEquals(Instant.parse("2026-11-07T00:00:00Z").epochSecond, exchangeRates.timestamp)
         assertEquals("nbp", source.getSourceId())
     }
@@ -55,7 +58,7 @@ class NbpExchangeRateSourceTest {
         expectedTimestamp: String,
     ) {
         whenever(client.getExchangeRates()).thenReturn(
-            NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.3916"), "2026-11-06"))),
+            listOf(NbpRatesResponse("2026-11-06", listOf(NbpRateItem(BigDecimal("4.3916"), "EUR")))),
         )
         val sourceWithFixedClock = NbpExchangeRateSource(client, properties, Clock.fixed(Instant.parse(now), ZoneOffset.UTC))
 
@@ -65,7 +68,7 @@ class NbpExchangeRateSourceTest {
     @Test
     fun `use the last published quote when no quote was published on Friday`() {
         whenever(client.getExchangeRates()).thenReturn(
-            NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.3916"), "2026-11-05"))),
+            listOf(NbpRatesResponse("2026-11-05", listOf(NbpRateItem(BigDecimal("4.3916"), "EUR")))),
         )
 
         assertEquals(Instant.parse("2026-11-07T00:00:00Z").epochSecond, source.getExchangeRate("PLN").timestamp)
@@ -73,7 +76,7 @@ class NbpExchangeRateSourceTest {
 
     @ParameterizedTest
     @MethodSource("invalidResponses")
-    fun `reject invalid quotes`(response: NbpRatesResponse) {
+    fun `reject invalid tables`(response: List<NbpRatesResponse>) {
         whenever(client.getExchangeRates()).thenReturn(response)
 
         val exception = assertThrows<ExchangeRateSourceException> { source.getExchangeRate("PLN") }
@@ -102,23 +105,33 @@ class NbpExchangeRateSourceTest {
 
     companion object {
         @JvmStatic
-        fun invalidResponses(): List<NbpRatesResponse> {
-            val valid = NbpRatesResponse("EUR", listOf(NbpRateItem(BigDecimal("4.3916"), "2026-11-05")))
-            return listOf(
-                valid.copy(code = null),
-                valid.copy(code = "USD"),
-                valid.copy(rates = null),
-                valid.copy(rates = emptyList()),
-                valid.copy(rates = listOf(NbpRateItem(null, "2026-11-05"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal.ZERO, "2026-11-05"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("-4.3916"), "2026-11-05"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("1E-19"), "2026-11-05"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("1E+19"), "2026-11-05"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.3916"), null))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.3916"), ""))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.3916"), "05.11.2026"))),
-                valid.copy(rates = listOf(NbpRateItem(BigDecimal("4.3916"), "2026-02-30"))),
-            )
+        fun invalidResponses(): List<List<NbpRatesResponse>> {
+            val item = NbpRateItem(BigDecimal("4.3916"), "EUR")
+            val valid = NbpRatesResponse("2026-11-05", listOf(item))
+            val invalidTables =
+                listOf(
+                    valid.copy(rates = null),
+                    valid.copy(rates = emptyList()),
+                    valid.copy(effectiveDate = null),
+                    valid.copy(effectiveDate = ""),
+                    valid.copy(effectiveDate = "05.11.2026"),
+                    valid.copy(effectiveDate = "2026-02-30"),
+                )
+            val invalidItems =
+                listOf(
+                    item.copy(code = null),
+                    item.copy(code = ""),
+                    item.copy(code = " "),
+                    item.copy(mid = null),
+                    item.copy(mid = BigDecimal.ZERO),
+                    item.copy(mid = BigDecimal("-4.3916")),
+                    item.copy(mid = BigDecimal("1E-19")),
+                    item.copy(mid = BigDecimal("1E+19")),
+                )
+            return listOf(emptyList(), listOf(valid, valid)) +
+                invalidTables.map { listOf(it) } +
+                invalidItems.map { listOf(valid.copy(rates = listOf(item.copy(code = "USD"), it))) } +
+                listOf(listOf(valid.copy(rates = listOf(item, item))))
         }
     }
 }

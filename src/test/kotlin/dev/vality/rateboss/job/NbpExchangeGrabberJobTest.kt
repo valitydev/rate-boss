@@ -1,18 +1,20 @@
 package dev.vality.rateboss.job
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import dev.vality.exrates.service.ConversionRequest
 import dev.vality.exrates.service.CurrencyData
 import dev.vality.exrates.service.GetCurrencyExchangeRateRequest
 import dev.vality.rateboss.ContainerConfiguration
 import dev.vality.rateboss.config.properties.RatesProperties
 import dev.vality.rateboss.dao.domain.tables.ExRate.EX_RATE
+import dev.vality.rateboss.model.NbpRatesResponse
 import dev.vality.rateboss.service.ExRateServiceHandler
 import org.apache.commons.math3.fraction.BigFraction
 import org.awaitility.Awaitility.await
 import org.jooq.DSLContext
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -34,6 +36,7 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers.request
 import org.springframework.test.web.client.response.MockRestResponseCreators.withServerError
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestTemplate
+import java.math.BigInteger
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
@@ -88,11 +91,19 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
 
     @ParameterizedTest
     @CsvSource("10000, 25000000, 10979", "20001, 50002500, 10979", "0, 0, 1")
-    fun `retry fetching the latest quote and expose the exact Saturday rate through both APIs`(
+    fun `retry fetching the full table and expose exact Saturday rates through both APIs`(
         amount: Long,
         convertedNumerator: Long,
         convertedDenominator: Long,
     ) {
+        val response = checkNotNull(javaClass.getResource("/nbp-table-a.json")).readText()
+        val table = jacksonObjectMapper().readValue<List<NbpRatesResponse>>(response).single()
+        val expectedRates =
+            table.rates!!.associate { item ->
+                val mid = checkNotNull(item.mid)
+                checkNotNull(item.code) to BigFraction(BigInteger.TEN.pow(mid.scale()), mid.unscaledValue())
+            }
+        assertEquals(32, expectedRates.size)
         val trigger = scheduler.getTrigger(TriggerKey(ratesProperties.nbpJob.jobTriggerName)) as CronTrigger
         assertEquals("0 0 0/1 * * ?", trigger.cronExpression)
         scheduler.pauseTrigger(trigger.key)
@@ -104,12 +115,7 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
             .andExpect(method(HttpMethod.GET))
             .andRespond(
                 withSuccess(
-                    """
-                    {
-                      "table": "A", "currency": "euro", "code": "EUR",
-                      "rates": [{"no": "216/A/NBP/2026", "effectiveDate": "2026-11-05", "mid": 4.3916}]
-                    }
-                    """.trimIndent(),
+                    response,
                     MediaType.APPLICATION_JSON,
                 ),
             )
@@ -117,41 +123,48 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
         scheduler.triggerJob(JobKey(ratesProperties.nbpJob.jobKey))
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted {
-            val record = dslContext.selectFrom(EX_RATE).fetchOne()
-            assertNotNull(record)
-            assertEquals("nbp", record!!.source)
-            assertEquals("PLN", record.sourceCurrencySymbolicCode)
-            assertEquals("EUR", record.destinationCurrencySymbolicCode)
-            assertEquals(2.toShort(), record.sourceCurrencyExponent)
-            assertEquals(2.toShort(), record.destinationCurrencyExponent)
-            assertEquals(2500L, record.rationalP)
-            assertEquals(10979L, record.rationalQ)
-            assertEquals(LocalDateTime.of(2026, 11, 7, 0, 0), record.rateTimestamp)
+            val records = dslContext.selectFrom(EX_RATE).fetch()
+            assertEquals(expectedRates.keys, records.map { it.destinationCurrencySymbolicCode }.toSet())
+            assertEquals(expectedRates.size, records.size)
+            for (record in records) {
+                assertEquals("nbp", record.source)
+                assertEquals("PLN", record.sourceCurrencySymbolicCode)
+                assertEquals(2.toShort(), record.sourceCurrencyExponent)
+                assertEquals(expectedRates[record.destinationCurrencySymbolicCode], BigFraction(record.rationalP, record.rationalQ))
+                assertEquals(LocalDateTime.of(2026, 11, 7, 0, 0), record.rateTimestamp)
+            }
+            assertEquals(2.toShort(), records.single { it.destinationCurrencySymbolicCode == "EUR" }.destinationCurrencyExponent)
+            assertEquals(0.toShort(), records.single { it.destinationCurrencySymbolicCode == "JPY" }.destinationCurrencyExponent)
         }
 
-        val rate =
-            handler.getExchangeRateData(
-                GetCurrencyExchangeRateRequest()
-                    .setCurrencyData(CurrencyData("PLN", "EUR"))
-                    .setDatetime("2026-11-07T12:00:00Z"),
-            )
-        assertEquals(CurrencyData("PLN", "EUR"), rate.currencyData)
-        assertEquals("2026-11-07T00:00:00Z", rate.timestamp)
-        assertEquals(BigFraction(2500, 10979), BigFraction(rate.exchange_rate.p, rate.exchange_rate.q))
+        for (code in listOf("EUR", "USD", "JPY", "XDR")) {
+            val rate =
+                handler.getExchangeRateData(
+                    GetCurrencyExchangeRateRequest()
+                        .setCurrencyData(CurrencyData("PLN", code))
+                        .setDatetime("2026-11-07T12:00:00Z"),
+                )
+            assertEquals(CurrencyData("PLN", code), rate.currencyData)
+            assertEquals("2026-11-07T00:00:00Z", rate.timestamp)
+            assertEquals(expectedRates[code], BigFraction(rate.exchange_rate.p, rate.exchange_rate.q))
 
-        val converted =
-            handler.getConvertedAmount(
-                "nbp",
-                ConversionRequest()
-                    .setSource("PLN")
-                    .setDestination("EUR")
-                    .setAmount(amount)
-                    .setDatetime("2026-11-07T12:00:00Z"),
-            )
-        assertEquals(BigFraction(convertedNumerator, convertedDenominator), BigFraction(converted.p, converted.q))
+            val converted =
+                handler.getConvertedAmount(
+                    "nbp",
+                    ConversionRequest()
+                        .setSource("PLN")
+                        .setDestination(code)
+                        .setAmount(amount)
+                        .setDatetime("2026-11-07T12:00:00Z"),
+                )
+            assertEquals(expectedRates.getValue(code).multiply(amount), BigFraction(converted.p, converted.q))
+            if (code == "EUR") {
+                assertEquals(BigFraction(convertedNumerator, convertedDenominator), BigFraction(converted.p, converted.q))
+            }
+        }
     }
 
     companion object {
-        private const val ENDPOINT = "https://api.nbp.pl/api/exchangerates/rates/A/EUR/?format=json"
+        private const val ENDPOINT = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json"
     }
 }
