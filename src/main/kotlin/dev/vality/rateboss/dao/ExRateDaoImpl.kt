@@ -74,7 +74,7 @@ class ExRateDaoImpl(
         return dsl
             .selectFrom(t)
             .where(condition)
-            .orderBy(t.RATE_TIMESTAMP.desc())
+            .orderBy(t.RATE_TIMESTAMP.desc(), t.ID.desc())
             .limit(1)
             .fetchOneInto(ExRate::class.java)
     }
@@ -90,7 +90,7 @@ class ExRateDaoImpl(
                     .and(t.SOURCE_CURRENCY_SYMBOLIC_CODE.eq(request.sourceCurrency))
                     .and(t.SOURCE.eq(request.source))
                     .and(DSL.cast(t.RATE_TIMESTAMP, SQLDataType.LOCALDATE).eq(targetRateDate)),
-            ).orderBy(t.RATE_TIMESTAMP.desc())
+            ).orderBy(t.RATE_TIMESTAMP.desc(), t.ID.desc())
             .limit(1)
             .fetchOneInto(ExRate::class.java)
     }
