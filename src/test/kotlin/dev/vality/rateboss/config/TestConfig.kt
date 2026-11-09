@@ -16,7 +16,7 @@ class TestConfig {
     fun testRestTemplate() = RestTemplate()
 
     @Bean
-    fun nbkrXmlMapper(): XmlMapper =
+    fun xmlMapper(): XmlMapper =
         XmlMapper
             .builder()
             .addModule(kotlinModule())
@@ -77,6 +77,12 @@ class TestConfig {
                 "nbp-name",
                 listOf(CurrencyProperties("PLN", 2)),
             ),
+            JobDescription(
+                "ecb-cron",
+                "ecb-key",
+                "ecb-name",
+                listOf(CurrencyProperties("EUR", 2)),
+            ),
             RatesSourceProperties(
                 FixerProperties("url", "key"),
                 CbrProperties("https://www.cbr.ru/scripts/XML_daily.asp", ZoneId.of("Europe/Moscow")),
@@ -99,6 +105,7 @@ class TestConfig {
                     ZoneId.of("Asia/Baku"),
                 ),
                 NbpProperties("https://api.nbp.pl/api/exchangerates/tables/A/"),
+                EcbProperties("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"),
             ),
         )
 }

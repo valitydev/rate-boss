@@ -60,6 +60,7 @@ class FixerExchangeGrabberJobTest : ContainerConfiguration() {
     @BeforeEach
     fun setUp() {
         scheduler.pauseTrigger(TriggerKey(ratesProperties.fixerJob.jobTriggerName))
+        scheduler.unscheduleJob(TriggerKey(ratesProperties.ecbJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbpJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.cbrJob.jobTriggerName))
         scheduler.unscheduleJob(TriggerKey(ratesProperties.nbkzJob.jobTriggerName))

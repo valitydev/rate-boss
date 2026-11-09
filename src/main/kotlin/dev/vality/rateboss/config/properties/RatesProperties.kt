@@ -16,6 +16,7 @@ data class RatesProperties(
     val nbuzJob: JobDescription,
     val nbazJob: JobDescription,
     val nbpJob: JobDescription,
+    val ecbJob: JobDescription,
     val source: RatesSourceProperties,
     val http: HttpProperties = HttpProperties(),
 )
@@ -41,6 +42,7 @@ data class RatesSourceProperties(
     val nbuz: NbuzProperties,
     val nbaz: NbazProperties,
     val nbp: NbpProperties,
+    val ecb: EcbProperties,
 )
 
 data class FixerProperties(
@@ -86,6 +88,11 @@ data class NbazProperties(
 data class NbpProperties(
     val rootUrl: String,
     val timeZone: ZoneId = ZoneId.of("Europe/Warsaw"),
+)
+
+data class EcbProperties(
+    val rootUrl: String,
+    val timeZone: ZoneId = ZoneId.of("Europe/Berlin"),
 )
 
 data class HttpProperties(

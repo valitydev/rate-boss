@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit
 
 @SpringBootTest(
     properties = [
+        "rates.ecb-job.jobTriggerName=",
         "rates.fixer-job.jobTriggerName=",
         "rates.cbr-job.jobTriggerName=",
         "rates.bi-job.jobTriggerName=",
@@ -96,7 +97,7 @@ class NbpExchangeGrabberJobTest : ContainerConfiguration() {
         convertedNumerator: Long,
         convertedDenominator: Long,
     ) {
-        val response = checkNotNull(javaClass.getResource("/nbp-table-a.json")).readText()
+        val response = checkNotNull(javaClass.getResource("/exchange-rates/nbp-table-a.json")).readText()
         val table = jacksonObjectMapper().readValue<List<NbpRatesResponse>>(response).single()
         val expectedRates =
             table.rates!!.associate { item ->
